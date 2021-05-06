@@ -6,3 +6,5 @@ CREATE TABLE `dasan_resort`.`card key` (
   `Room_ID` INT(10) NOT NULL,
   `Cust_ID` INT(10) NOT NULL,
   PRIMARY KEY (`Key_ID`));
+  
+  
