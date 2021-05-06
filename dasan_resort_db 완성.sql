@@ -102,22 +102,6 @@ CREATE TABLE BANQUET
 ALTER TABLE BANQUET COMMENT '연회';
 
 
-CREATE TABLE CUSTOMER
-(
-    `Cust_ID`                                     INT            NOT NULL    AUTO_INCREMENT COMMENT '고객ID', 
-    `Cust_Name`                                   VARCHAR(15)    NOT NULL    COMMENT '고객 이름', 
-    `Cust_Contact`                                INT            NOT NULL    COMMENT '고객 전화번호', 
-    `Cust_Email`                                  VARCHAR(30)    NOT NULL    COMMENT '고객 이메일', 
-    `Cust_Address`                                VARCHAR(15)    NOT NULL    COMMENT '고객 주소', 
-    `Cust_Password`                               INT            NOT NULL    COMMENT '고객 비밀번호', 
-    `Cust_CurrentMile[Pay_amount, Cust_usedmile]` INT            NOT NULL    COMMENT '고객의 현재 마일리지', 
-    `Cust_Usedmile`                               INT            NOT NULL    COMMENT '고객이 사용한 마일리지', 
-    CONSTRAINT  PRIMARY KEY (Cust_ID)
-);
-
-ALTER TABLE CUSTOMER COMMENT '고객';
-
-
 CREATE TABLE ROOMPRICE
 (
     `RoomPrice_ID`  INT           NOT NULL    AUTO_INCREMENT COMMENT '객실가격ID', 
