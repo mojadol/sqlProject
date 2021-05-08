@@ -1,0 +1,23 @@
+CREATE DATABASE dasan_resort;
+use dasan_resort;
+
+CREATE TABLE BED (
+`Bed_ID` INT NOT NULL AUTO_INCREMENT COMMENT '침대 ID',
+`Bed_Type` VARCHAR(15) NOT NULL COMMENT '침대 종류',
+`Bed_State` VARCHAR(15) NULL COMMENT '침대 상태',
+`Bed_Available` INT NOT NULL COMMENT '이용가능한 침대',
+`Bed_Price`  INT NOT NULL COMMENT '침대 이용료',
+CONSTRAINT PRIMARY KEY(BED_ID));
+
+ALTER TABLE `BED` COMMENT='침대 정보 테이블'; 
+
+CREATE TABLE ROOM (
+`Room_ID` INT NOT NULL AUTO_INCREMENT COMMENT '방 ID',
+`Room_Type` VARCHAR(15) NOT NULL COMMENT '방 종류',
+`Room_Facility` VARCHAR(15) NOT NULL COMMENT '방 시설',
+`Room_AvailableNO` VARCHAR(15) NOT NULL COMMENT '이용가능한 방 개수',
+`Room_ResState` VARCHAR(15) NULL  COMMENT '방 예약 현황',
+`Bed_ID` INT NOT NULL COMMENT '침대 ID',
+CONSTRAINT PRIMARY KEY(Room_ID));
+
+ALTER TABLE `ROOM` COMMENT='방 정보 테이블';
