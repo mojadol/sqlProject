@@ -208,6 +208,45 @@ CREATE TABLE RESTAURANTORDER
 
 ALTER TABLE RESTAURANTORDER COMMENT '레스토랑 주문 테이블';
 
+CREATE TABLE SHUTTLE
+(
+    `Shuttle_ID`                                 INT         NOT NULL    AUTO_INCREMENT COMMENT '셔틀 번호', 
+    `Shuttle_Type`                               VarChar(15) CHECK (Shuttle_Type IN ('버스'))    NOT NULL    COMMENT '셔틀 타입', 
+    `Shuttle_Route`                               VarChar(15)     NOT NULL    COMMENT '셔틀 루트', 
+    `Shuttle_Depart`                       VarChar(15)   CHECK (Shuttle_Depart IN ('리조트','공항','화성행궁'))    NOT NULL    DEFAULT 0   COMMENT '셔틀 출발지', 
+    `Shuttle_Arrive`                                      VarChar(15)   CHECK (Shuttle_Arrive IN ('리조트','공항','화성행궁'))      NOT NULL    COMMENT '셔틀 도착지', 
+    `Shuttle_DepartTime`                                      TIME    CHECK (Shuttle_DepartTime IN ('09:00','10:00','20:00'))    NOT NULL    COMMENT '셔틀 출발시간', 
+    `Cust_ID`                                     INT        NOT NULL    COMMENT '고객ID', 
+    CONSTRAINT  PRIMARY KEY (Shuttle_ID)
+);
+
+ALTER TABLE SHUTTLE COMMENT '셔틀버스 테이블';
+
+CREATE TABLE BOOKCANCEL
+(
+    `Can_ID`                                 INT         NOT NULL    AUTO_INCREMENT COMMENT '취소 번호', 
+    `Can_Reason`                               VarChar(15)     NOT NULL    COMMENT '취소 이유', 
+    `Can_date`                               DATETIME(6)    NOT NULL    COMMENT '취소 날짜', 
+    `Can_Datedif`                       DATE         NOT NULL    DEFAULT 0   COMMENT '취소와 날짜차이', 
+    `Can_Refund`                                      INT         NOT NULL    COMMENT '취소 환불총액', 
+    `Booking_ID`                                      INT        NOT NULL    COMMENT '예약 번호', 
+    `Pol_ID`                                     INT        NOT NULL    COMMENT '정책 번호', 
+    `Room_ID`        INT            NOT NULL    NOT NULL COMMENT '객실ID',
+    CONSTRAINT  PRIMARY KEY (Can_ID)
+);
+
+ALTER TABLE BOOKCANCEL COMMENT '예약취소 테이블';
+
+CREATE TABLE CANCELPOLICY
+(
+    `Pol_ID`                                 INT         NOT NULL    AUTO_INCREMENT COMMENT '정책 번호', 
+    `Pol_Datedif`                              DATE     NOT NULL    COMMENT '날짜차이 정의', 
+    `Pol_RefundDate`                               DATETIME(6)    NOT NULL    COMMENT '환불율 정책', 
+    CONSTRAINT  PRIMARY KEY (Pol_ID)
+);
+
+ALTER TABLE CANCELPOLICY COMMENT '노쇼 정책 테이블';
+
 -- 주석 --
 
 ALTER TABLE PAYMENT
@@ -245,10 +284,6 @@ ALTER TABLE SERVICEREQUIREMENT
 ALTER TABLE BOOKING
     ADD CONSTRAINT FK_BOOKING_Cust_ID_CUSTOMER_Cust_ID FOREIGN KEY (Cust_ID)
         REFERENCES CUSTOMER (Cust_ID) ON DELETE CASCADE ON UPDATE CASCADE;
-
-ALTER TABLE BOOKING
-    ADD CONSTRAINT FK_BOOKING_Banquet_ID_BANQUET_Banquet_ID FOREIGN KEY (Banquet_ID)
-        REFERENCES BANQUET (Banquet_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE BOOKING
     ADD CONSTRAINT FK_BOOKING_RoomPrice_ID_ROOMPRICE_RoomPrice_ID FOREIGN KEY (RoomPrice_ID)
@@ -318,8 +353,23 @@ ALTER TABLE RESTAURANTORDER
     ADD CONSTRAINT FK_RESTAURANTORDER_Cust_ID_CUSTOMER_Cust_ID FOREIGN KEY (Cust_ID)
         REFERENCES CUSTOMER (Cust_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
+ALTER TABLE SHUTTLE
+    ADD CONSTRAINT FK_SHUTTLE_Cust_ID_CUSTOMER_Cust_ID FOREIGN KEY (Cust_ID)
+        REFERENCES CUSTOMER (Cust_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+        
+ALTER TABLE BOOKCANCEL
+    ADD CONSTRAINT FK_BOOKCANCEL_Booking_ID_BOOKING_Booking_ID FOREIGN KEY (Booking_ID)
+        REFERENCES BOOKING (Booking_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+        
+ALTER TABLE BOOKCANCEL
+    ADD CONSTRAINT FK_BOOKCANCEL_Room_ID_ROOMSTATE_Room_ID FOREIGN KEY (Room_ID)
+        REFERENCES ROOMSTATE (Room_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+        
+ALTER TABLE BOOKCANCEL
+    ADD CONSTRAINT FK_BOOKCANCEL_Pol_ID_CANCELPOLICY_Pol_ID FOREIGN KEY (Pol_ID)
+        REFERENCES CANCELPOLICY (Pol_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+        
 -- ★desc★ 하는법 --
-desc banquet;
 desc bed;
 desc booking;
 desc cardkey;
