@@ -91,17 +91,6 @@ CREATE TABLE BOOKING
 ALTER TABLE BOOKING COMMENT '예약 테이블';
 
 
-CREATE TABLE BANQUET
-(
-    `Banquet_ID`        INT            NOT NULL    AUTO_INCREMENT COMMENT '연회ID', 
-    `Banquet_ResState`  VARCHAR(15)    NULL        COMMENT '연회 이용현황', 
-    `Banquet_AvailNo`   INT            NOT NULL    COMMENT '이용가능한 연회 번호', 
-    `Banquet_Price`     INT            NOT NULL    COMMENT '연회 가격', 
-    CONSTRAINT  PRIMARY KEY (Banquet_ID)
-);
-
-ALTER TABLE BANQUET COMMENT '연회 테이블';
-
 
 CREATE TABLE ROOMPRICE
 (
@@ -134,7 +123,6 @@ CREATE TABLE ROOM
 (
     `Room_ID`        INT            NOT NULL    AUTO_INCREMENT COMMENT '객실ID', 
     `Room_Type`      VarChar(15)    NOT NULL    COMMENT '객실 타입', 
-    `Room_Facility`  VarChar(15)    NOT NULL    COMMENT '객실 내 시설', 
     `Room_AvailNo.`  VarChar(15)    NOT NULL    COMMENT '이용가능한 객실 번호', 
     `Room_ResState`  BIT(1)         NULL        DEFAULT 0   COMMENT '객실 예약현황', 
     `Bed_ID`         INT            NOT NULL    COMMENT '침대ID', 
