@@ -65,7 +65,8 @@ CREATE TABLE BED
     `Bed_ID`         INT            NOT NULL    AUTO_INCREMENT COMMENT '침대 ID', 
     `Bed_Type`       VarChar(15)    CHECK (Bed_Type IN ('더블베드','킹'))    NOT NULL    COMMENT '침대 유형', 
     `Bed_State`      VarChar(15)    CHECK (Bed_State IN ('부서짐','수리필요','사용가능'))    NULL        COMMENT '침대 상태', 
-    `Bed_Available`  INT            NOT NULL    COMMENT '침대 이용 가능 숫자', 
+    `Bed_Available`  INT            NOT NULL    COMMENT '침대 이용 가능 숫자',
+    `Room_ID`        INT            NOT NULL    COMMENT '객실 번호',
     CONSTRAINT  PRIMARY KEY (Bed_ID)
 );
 
@@ -98,7 +99,7 @@ CREATE TABLE ROOMPRICE
     `Room_Week`     BOOL          NOT NULL    DEFAULT 0   COMMENT '객실 - 주중/주말', 
     `Room_Peak`     BOOL          NOT NULL    DEFAULT 0   COMMENT '객실 - 성수기/비성수기', 
     `Room_ID`       INT           NOT NULL    COMMENT '객실ID', 
-    `Room_Type`     VarChar(15)   CHECK (Room_Type IN('디럭스룸','비즈니스룸','수페리어룸','디럭스룸 suite','비즈니스룸 suite', '수페리어룸 suite'))    NOT NULL    COMMENT '객실 타입', 
+    `Room_Type`     VarChar(15)   NOT NULL    COMMENT '객실 타입', 
     CONSTRAINT  PRIMARY KEY (RoomPrice_ID)
 );
 
@@ -107,8 +108,8 @@ ALTER TABLE ROOMPRICE COMMENT '객실 가격 테이블';
 
 CREATE TABLE ROOMSTATE
 (
-    `Room_ID`          INT       NOT NULL    AUTO_INCREMENT COMMENT '객실ID', 
-    `RoomState_State`  BOOL    NULL        COMMENT '객실 이용현황', 
+    `Room_ID`          INT       NOT NULL   COMMENT '객실ID', 
+    `RoomState_State`  BOOL      NULL        COMMENT '객실 이용현황', 
     `Cust_ID`          INT       NOT NULL    COMMENT '고객ID', 
     `Booking_ID`       INT       NOT NULL    COMMENT '예약ID', 
     `Service_ID`       INT       NOT NULL    COMMENT '서비스ID', 
@@ -121,10 +122,9 @@ ALTER TABLE ROOMSTATE COMMENT '객실상태 테이블';
 CREATE TABLE ROOM
 (
     `Room_ID`        INT            NOT NULL    AUTO_INCREMENT COMMENT '객실ID', 
-    `Room_Type`      VarChar(15)    NOT NULL    COMMENT '객실 타입', 
-    `Room_AvailNo.`  INT    NOT NULL    COMMENT '이용가능한 사람 수', 
+    `Room_Type`      VarChar(15)    CHECK (Room_Type IN('디럭스룸','비즈니스룸','수페리어룸','디럭스룸 suite','비즈니스룸 suite', '수페리어룸 suite'))    NOT NULL    COMMENT '객실 타입', 
+    `Room_AvailNo`  INT    NOT NULL    COMMENT '이용가능한 사람 수', 
     `Room_ResState`  BOOL         NULL        DEFAULT 0   COMMENT '객실 예약현황', 
-    `Bed_ID`         INT            NOT NULL    COMMENT '침대ID', 
     CONSTRAINT  PRIMARY KEY (Room_ID)
 );
 
@@ -171,7 +171,7 @@ ALTER TABLE FINE COMMENT '벌금';
 
 CREATE TABLE CARDKEY
 (
-    `KEY_ID`   INT    NOT NULL    AUTO_INCREMENT COMMENT '키이름', 
+    `KEY_ID`   INT    NOT NULL    AUTO_INCREMENT   COMMENT '키이름', 
     `Room_ID`  INT    NOT NULL    COMMENT '방이름', 
     `Cust_ID`  INT    NOT NULL    COMMENT '고객이름', 
     CONSTRAINT  PRIMARY KEY (KEY_ID)
@@ -198,7 +198,7 @@ CREATE TABLE RESTAURANTORDER
     `ResOrder_ID`                                 INT         NOT NULL    AUTO_INCREMENT COMMENT '주문 번호', 
     `ResOrder_Menu`                               VarChar(15)     CHECK (ResOrder_Menu IN ('짜장면','우동','비빔밥','파스타','칵테일','맥주','바삭한 치킨'))    NOT NULL    COMMENT '주문 메뉴', 
     `ResOrder_Date`                               DATETIME(6)    NOT NULL    COMMENT '주문 날짜 및 시간', 
-    `RestOrder_TotalAmount`                       INT         NOT NULL    DEFAULT 0   COMMENT '주문 총액, [Res_Menu, Res_Price]', 
+    `ResOrder_TotalAmount`                       INT         NOT NULL    DEFAULT 0   COMMENT '주문 총액, [Res_Menu, Res_Price]', 
     `KEY_ID`                                      INT         NOT NULL    COMMENT '키ID', 
     `Res_ID`                                      INT        NOT NULL    COMMENT '레스토랑ID', 
     `Cust_ID`                                     INT        NOT NULL    COMMENT '고객ID', 
@@ -211,8 +211,7 @@ CREATE TABLE SHUTTLE
 (
     `Shuttle_ID`                                 INT         NOT NULL    AUTO_INCREMENT COMMENT '셔틀 번호', 
     `Shuttle_Type`                               VarChar(15) CHECK (Shuttle_Type IN ('버스'))    NOT NULL    COMMENT '셔틀 타입', 
-    `Shuttle_Route`                               VarChar(15)     NOT NULL    COMMENT '셔틀 루트', 
-    `Shuttle_Depart`                       VarChar(15)   CHECK (Shuttle_Depart IN ('리조트','공항','화성행궁'))    NOT NULL    DEFAULT 0   COMMENT '셔틀 출발지', 
+	`Shuttle_Depart`                       VarChar(15)   CHECK (Shuttle_Depart IN ('리조트','공항','화성행궁'))    NOT NULL    DEFAULT 0   COMMENT '셔틀 출발지', 
     `Shuttle_Arrive`                                      VarChar(15)   CHECK (Shuttle_Arrive IN ('리조트','공항','화성행궁'))      NOT NULL    COMMENT '셔틀 도착지', 
     `Shuttle_DepartTime`                                      TIME    CHECK (Shuttle_DepartTime IN ('09:00','10:00','20:00'))    NOT NULL    COMMENT '셔틀 출발시간', 
     `Cust_ID`                                     INT        NOT NULL    COMMENT '고객ID', 
@@ -226,7 +225,7 @@ CREATE TABLE BOOKCANCEL
     `Can_ID`                                 INT         NOT NULL    AUTO_INCREMENT COMMENT '취소 번호', 
     `Can_Reason`                               VarChar(15)     NOT NULL    COMMENT '취소 이유', 
     `Can_date`                               DATETIME(6)    NOT NULL    COMMENT '취소 날짜', 
-    `Can_Datedif`                       DATE         NOT NULL    DEFAULT 0   COMMENT '취소와 날짜차이', 
+    `Can_Datedif`                       INT         NOT NULL    DEFAULT 0   COMMENT '취소와 날짜차이', 
     `Can_Refund`                                      INT         NOT NULL    COMMENT '취소 환불총액', 
     `Booking_ID`                                      INT        NOT NULL    COMMENT '예약 번호', 
     `Pol_ID`                                     INT        NOT NULL    COMMENT '정책 번호', 
@@ -239,12 +238,14 @@ ALTER TABLE BOOKCANCEL COMMENT '예약취소 테이블';
 CREATE TABLE CANCELPOLICY
 (
     `Pol_ID`                                 INT         NOT NULL    AUTO_INCREMENT COMMENT '정책 번호', 
-    `Pol_Datedif`                              DATE     NOT NULL    COMMENT '날짜차이 정의', 
-    `Pol_RefundDate`                               DATETIME(6)    NOT NULL    COMMENT '환불율 정책', 
+    `Pol_Datedif`                            INT         NOT NULL    COMMENT '날짜차이 정의', 
+    `Pol_RefundRate`                         INT         NOT NULL    COMMENT '환불 비율', 
     CONSTRAINT  PRIMARY KEY (Pol_ID)
 );
 
 ALTER TABLE CANCELPOLICY COMMENT '노쇼 정책 테이블';
+
+
 
 -- 주석 --
 
@@ -289,8 +290,8 @@ ALTER TABLE BOOKING
         REFERENCES ROOMPRICE (RoomPrice_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE ROOMPRICE
-    ADD CONSTRAINT FK_ROOMPRICE_Room_ID_ROOMSTATE_Room_ID FOREIGN KEY (Room_ID)
-        REFERENCES ROOMSTATE (Room_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+    ADD CONSTRAINT FK_ROOMPRICE_Room_ID_ROOM_Room_ID FOREIGN KEY (Room_ID)
+        REFERENCES ROOM (Room_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE ROOMSTATE
     ADD CONSTRAINT FK_ROOMSTATE_Room_ID_ROOM_Room_ID FOREIGN KEY (Room_ID)
@@ -308,9 +309,9 @@ ALTER TABLE ROOMSTATE
     ADD CONSTRAINT FK_ROOMSTATE_Service_ID_SERVICE_Service_ID FOREIGN KEY (Service_ID)
         REFERENCES SERVICE (Service_ID) ON DELETE CASCADE ON UPDATE CASCADE;
         
-ALTER TABLE ROOM
-    ADD CONSTRAINT FK_ROOM_Bed_ID_BED_Bed_ID FOREIGN KEY (Bed_ID)
-        REFERENCES BED (Bed_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE BED
+    ADD CONSTRAINT FK_Bed_ROOM_ID_ROOM_Room_ID FOREIGN KEY (Room_ID)
+        REFERENCES ROOM (ROOM_ID) ON DELETE CASCADE ON UPDATE CASCADE;
         
 ALTER TABLE FACILITYREQUIREMENT
     ADD CONSTRAINT FK_FACILITYREQUIREMENT_Fac_ID_FACILITY_Fac_ID FOREIGN KEY (Fac_ID)
@@ -362,12 +363,13 @@ ALTER TABLE BOOKCANCEL
         
 ALTER TABLE BOOKCANCEL
     ADD CONSTRAINT FK_BOOKCANCEL_Room_ID_ROOMSTATE_Room_ID FOREIGN KEY (Room_ID)
-        REFERENCES ROOMSTATE (Room_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+        REFERENCES ROOM (Room_ID) ON DELETE CASCADE ON UPDATE CASCADE;
         
 ALTER TABLE BOOKCANCEL
     ADD CONSTRAINT FK_BOOKCANCEL_Pol_ID_CANCELPOLICY_Pol_ID FOREIGN KEY (Pol_ID)
         REFERENCES CANCELPOLICY (Pol_ID) ON DELETE CASCADE ON UPDATE CASCADE;
-        
+       
+	
 -- ★desc★ 하는법 --
 desc bed;
 desc booking;
@@ -385,7 +387,52 @@ desc roomstate;
 desc service;
 desc servicerequirement;
 
+-- 1번 순서 --
 
+INSERT INTO RESTAURANT (Res_Type, Res_Menu, Res_Menu_Price) VALUE ('한식당', '비빔밥', '6000');
 
+INSERT INTO SERVICE (Service_Type, Service_Price) VALUE ('떡 만들기', '60000');
 
+INSERT INTO ROOM (Room_Type, Room_AvailNo, Room_ResState) VALUE ('디럭스룸', '2', '1');
+
+INSERT INTO CUSTOMER(Cust_webID,Cust_Name,Cust_Contact,Cust_Email,Cust_Address,Cust_Password,Cust_CurrentMile,Cust_Usedmile) 
+Values ('choco','이성규','010-4906-8347','loveleemoon@naver.com','경기도 화성시','sg1234',3000,0);
+
+INSERT INTO FACILITY(Fac_Price,Fac_Type) Values ('30000','슈퍼마켓');
+
+INSERT INTO CANCELPOLICY(Pol_Datedif,Pol_RefundRate) Values ('1', '0.2');
+
+-- 2번 순서 --
+
+INSERT INTO SHUTTLE (Shuttle_Type, Shuttle_Depart, Shuttle_Arrive, Shuttle_DepartTime, Cust_ID) VALUE ('버스', '공항', '리조트', '10:00', '1');
+
+INSERT INTO BED (Bed_Type, Bed_State, Bed_Available, Room_ID) VALUE ('킹', '사용가능', '250', '1');
+
+-- 3번 순서 --
+
+INSERT INTO ROOMPRICE (Room_Price, Room_Week, Room_Peak, Room_ID, Room_Type) VALUE ('200000', '0', '1', '1', '디럭스룸');
+
+INSERT INTO BOOKING (Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Room_Choice, Bed_PlusState, RoomPrice_ID, Booking_TotalAmount, Booking_method) VALUE ('2021-06-04 15:00:00', '2021-06-06 11:00:00', '1',  '2', '디럭스룸', '추가 불가능', '1', '400000', '홈페이지');
+
+-- 4번 순서 --
+
+INSERT INTO BOOKCANCEL (Can_Reason, Can_date, Can_Datedif, Can_Refund, Booking_ID, Pol_ID, Room_ID) VALUE ('코로나', '2021-07-01', '3', '10000', '1', '1', '1');
+
+INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID, Service_ID) VALUE ('1','1','1','1','1');
+
+-- 5번 순서 --
+
+INSERT INTO CARDKEY(Room_ID, Cust_ID) VALUE ('1', '1');
+
+-- 6번 순서 --
+
+INSERT INTO SERVICEREQUIREMENT(Service_ID, SerReq_Count, SerReq_TotalAmount, KEY_ID, Cust_ID) VALUE ('1','1','1','1','1');
+
+INSERT INTO FACILITYREQUIREMENT (Fac_ID, Fac_Count, FacReq_TotalAmount, KEY_ID, Cust_ID) VALUE ('1', '3', '30000', '1', '1');
+
+INSERT INTO RESTAURANTORDER (ResOrder_Menu, ResOrder_Date, ResOrder_TotalAmount, KEY_ID, Res_ID, Cust_ID) VALUE('비빔밥', '2021-06-05 19:00:00', '6000', '1', '1', '1');
+
+-- 7번 순서 --
+
+INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, ResOrder_ID, SerReq_ID, FacReq_ID, Cust_ID) VALUE ('36000', '2021-06-05 19:00:00', '카드키', '1', '1', '1', '1', '1');
 
