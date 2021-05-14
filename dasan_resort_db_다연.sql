@@ -23,7 +23,7 @@ CREATE TABLE PAYMENT
     `Pay_ID`                                                                        INT             NOT NULL    AUTO_INCREMENT COMMENT '지불 ID', 
     `Pay_TotalAmount`                                                               INT             NOT NULL    DEFAULT 0   COMMENT '지불 총 금액[식당 주문 총 금액 + 서비스 이용 총 금액 + 시설 이용 총 금액]', 
     `Pay_Date`                                                                      DATETIME(6)     NOT NULL    COMMENT '지불 날짜 및 시간', 
-    `Pay_Type`                                                                      VARCHAR(15)     CHECK (Pay_Type IN ('카드키','신용카드','현금','수표'))    NOT NULL    COMMENT '지불 수단', 
+    `Pay_Type`                                                                      VARCHAR(15)     CHECK (Pay_Type IN ('신용카드','현금','수표','마일리지'))    NOT NULL    COMMENT '지불 수단', 
     `KEY_ID`                                                                        INT             NOT NULL    COMMENT '카드키 ID', 
     `ResOrder_ID`                                                                   INT             NOT NULL    COMMENT '식당 주문 ID', 
     `SerReq_ID`                                                                     INT             NOT NULL    COMMENT '서비스 요청 ID', 
@@ -63,7 +63,7 @@ ALTER TABLE SERVICEREQUIREMENT COMMENT '고객 서비스 요청 테이블';
 CREATE TABLE BED
 (
     `Bed_ID`         INT            NOT NULL    AUTO_INCREMENT COMMENT '침대 ID', 
-    `Bed_Type`       VarChar(15)    CHECK (Bed_Type IN ('더블베드','킹'))    NOT NULL    COMMENT '침대 유형', 
+    `Bed_Type`       VarChar(15)    CHECK (Bed_Type IN ('더블','킹'))    NOT NULL    COMMENT '침대 유형', 
     `Bed_State`      VarChar(15)    CHECK (Bed_State IN ('부서짐','수리필요','사용가능'))    NULL        COMMENT '침대 상태', 
     `Room_ID`        INT            NULL    COMMENT '객실 번호',
     CONSTRAINT  PRIMARY KEY (Bed_ID)
@@ -75,8 +75,8 @@ ALTER TABLE BED COMMENT '침대 테이블';
 CREATE TABLE BOOKING
 (
     `Booking_ID`                                                      INT            NOT NULL    AUTO_INCREMENT COMMENT '예약ID', 
-    `Booking_CheckInDate`                                             DATETIME(6)    NOT NULL    COMMENT '예약 체크인 날짜 및 시간', 
-    `Booking_CheckOutDate`                                            DATETIME(6)    NOT NULL    COMMENT '예약 체크아웃 날짜 및 시간', 
+    `Booking_CheckInDate`                                             DATE           NOT NULL    COMMENT '예약 체크인 날짜 및 시간', 
+    `Booking_CheckOutDate`                                            DATE           NOT NULL    COMMENT '예약 체크아웃 날짜 및 시간', 
     `Cust_ID`                                                         INT            NOT NULL    COMMENT '고객ID', 
     `People_No`                                                       INT            NOT NULL    COMMENT '고객 명수', 
     `Room_Choice`                                                     VARCHAR(15)    CHECK (Room_Choice IN('디럭스룸','비즈니스룸','수페리어룸','디럭스룸 suite','비즈니스룸 suite', '수페리어룸 suite'))    NOT NULL    COMMENT '객실 선택', 
@@ -84,7 +84,7 @@ CREATE TABLE BOOKING
     `RoomPrice_ID`                                                    INT            NOT NULL    COMMENT '객실가격ID', 
     `Booking_TotalAmount`                                             INT            NOT NULL    DEFAULT 0   COMMENT '예약 총금액[RoomPrice_Amount, Bed_PlusState, PeopleNo]', 
     `Booking_method`                                                  VARCHAR(15)    CHECK (Booking_method IN ('홈페이지','전화','방문'))    NOT NULL    COMMENT '예약 수단', 
-	`Shuttle_ID`                                                      INT            NOT NULL    COMMENT '셔틀 번호 (신청)', 
+	`Shuttle_ID`                                                      INT            NULL    COMMENT '셔틀 번호 (신청)', 
     CONSTRAINT  PRIMARY KEY (Booking_ID)
 );
 
@@ -160,7 +160,7 @@ CREATE TABLE FINE
 (
     `Fine_ID`      INT        NOT NULL    AUTO_INCREMENT COMMENT '벌금ID', 
     `Fine_Amount`  INT      NOT NULL    DEFAULT 0   COMMENT '벌금액', 
-    `Fine_reason`  VARCHAR(15)    CHECK (Fine_reason IN ('취사','흡연','카드키 분실'))    NOT NULL    COMMENT '벌금 사유', 
+    `Fine_reason`  VARCHAR(15)    CHECK (Fine_reason IN ('취사','흡연','카드키 분실', '퇴실 지연'))    NOT NULL    COMMENT '벌금 사유', 
     `Cust_ID`      INT        NOT NULL    COMMENT '고객이름', 
     `Room_ID`      INT        NOT NULL    COMMENT '방이름', 
     CONSTRAINT  PRIMARY KEY (Fine_ID)
@@ -172,8 +172,8 @@ ALTER TABLE FINE COMMENT '벌금';
 CREATE TABLE CARDKEY
 (
     `KEY_ID`   INT    NOT NULL    AUTO_INCREMENT   COMMENT '키이름', 
-    `Room_ID`  INT    NOT NULL    COMMENT '방이름', 
-    `Cust_ID`  INT    NOT NULL    COMMENT '고객이름', 
+    `Room_ID`  INT    NULL    COMMENT '방이름', 
+    `Cust_ID`  INT    NULL    COMMENT '고객이름', 
     CONSTRAINT  PRIMARY KEY (KEY_ID)
 );
 
@@ -439,6 +439,9 @@ Values
 ('bonus','유재석','010-9991-0549','hackggoljam@naver.com','대구광역시','aktdltek12',10000,0),
 ('ketchup','당구대','010-1299-5513','mystery@naver.com','경기도 수원시','an151',20000,0);
 
+
+본인이만든 15개의 커스터머중에서는 5개 커스터머는 현재 투숙중에있고, 5개는 회원가입만한상태라서 다른데이터는 없고, 2개는 페이먼트를한 이전 이용고객이라고 생각을합시다!
+
 INSERT INTO FACILITY(Fac_Price,Fac_Type) VALUES 
 ('500', '슈퍼마켓'),
 ('1000', '슈퍼마켓'),
@@ -498,40 +501,44 @@ INSERT INTO ROOMPRICE (Room_Price, Room_Week, Room_Peak, Room_ID, Room_Type) VAL
 
 INSERT INTO BOOKING (Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Room_Choice, Bed_PlusState, RoomPrice_ID, Booking_TotalAmount, Booking_method) 
 VALUE
-('2021-06-04 15:00:00', '2021-06-06 11:00:00', '1',  '2', '디럭스룸', '0', '1', '200000', '홈페이지'),
-('2021-06-04 16:00:00', '2021-06-06 12:00:00', '2',  '2', '디럭스룸', '0', '2', '200000', '전화'),
-('2021-06-04 17:00:00', '2021-06-06 13:00:00', '3',  '4', '비즈니스룸', '0', '3', '320000', '홈페이지'),
-('2021-06-04 18:00:00', '2021-06-06 14:00:00', '4',  '4', '비즈니스룸', '1', '4', '340000', '홈페이지'),
-('2021-06-05 15:00:00', '2021-06-06 11:00:00', '5',  '4', '비즈니스룸', '0', '5', '320000', '전화'),
-('2021-06-05 16:00:00', '2021-06-06 12:00:00', '6',  '2', '디럭스룸', '0', '5', '200000', '홈페이지'),
-('2021-06-05 17:00:00', '2021-06-06 13:00:00', '7',  '2', '디럭스룸', '0', '6', '200000', '홈페이지'),
-('2021-06-05 18:00:00', '2021-06-06 14:00:00', '8',  '6', '수페리어룸', '2', '6', '480000', '홈페이지'),
-('2021-06-05 18:30:00', '2021-06-06 14:30:00', '9',  '2', '디럭스룸', '0', '6', '200000', '방문'),
-('2021-06-09 10:00:00', '2021-06-10 10:00:00', '10',  '4', '비즈니스룸', '1', '1', '340000', '홈페이지'),
-('2021-06-09 12:00:00', '2021-06-06 10:00:00', '11',  '2', '디럭스룸', '0', '2', '200000', '홈페이지'),
-('2021-06-09 13:00:00', '2021-06-06 17:00:00', '12',  '2', '디럭스룸', '0', '3', '200000', '홈페이지'),
-('2021-06-09 18:00:00', '2021-06-06 18:00:00', '13',  '2', '디럭스룸', '0', '4', '200000', '방문'),
-('2021-06-10 10:00:00', '2021-06-06 19:00:00', '14',  '6', '수페리어룸', '2', '3', '480000', '방문'),
-('2021-06-10 11:00:00', '2021-06-06 11:00:00', '15',  '6', '수페리어룸', '2', '1', '480000', '홈페이지');
+('2021-06-04', '2021-06-06', '1',  '2', '디럭스룸', '0', '1', '200000', '홈페이지'),
+('2021-06-04', '2021-06-06', '2',  '2', '디럭스룸', '0', '2', '200000', '전화'),
+('2021-06-04', '2021-06-06', '3',  '4', '비즈니스룸', '0', '3', '320000', '홈페이지'),
+('2021-06-04', '2021-06-06', '4',  '4', '비즈니스룸', '1', '4', '340000', '홈페이지'),
+('2021-06-05', '2021-06-06', '5',  '4', '비즈니스룸', '0', '5', '320000', '전화'),
+('2021-06-05', '2021-06-06', '6',  '2', '디럭스룸', '0', '5', '200000', '홈페이지'),
+('2021-06-05', '2021-06-06', '7',  '2', '디럭스룸', '0', '6', '200000', '홈페이지'),
+('2021-06-05', '2021-06-06', '8',  '6', '수페리어룸', '2', '6', '480000', '홈페이지'),
+('2021-06-05', '2021-06-06', '9',  '2', '디럭스룸', '0', '6', '200000', '방문'),
+('2021-06-09', '2021-06-10', '10',  '4', '비즈니스룸', '1', '1', '340000', '홈페이지'),
+('2021-06-09', '2021-06-06', '11',  '2', '디럭스룸', '0', '2', '200000', '홈페이지'),
+('2021-06-09', '2021-06-06', '12',  '2', '디럭스룸', '0', '3', '200000', '홈페이지'),
+('2021-06-09', '2021-06-06', '13',  '2', '디럭스룸', '0', '4', '200000', '방문'),
+('2021-06-10 ', '2021-06-06', '14',  '6', '수페리어룸', '2', '3', '480000', '방문'),
+('2021-06-10', '2021-06-06', '15',  '6', '수페리어룸', '2', '1', '480000', '홈페이지');
+
 
 -- 4번 순서 --
+
+
+select * from cancelpolicy;
 
 INSERT INTO BOOKCANCEL (Can_Reason, Can_date, Can_Datedif, Can_Refund, Booking_ID, Pol_ID, Room_ID) VALUES 
 ('코로나', '2021-07-01', '3', '100000', '1', '1', '1'),
 ('개인사유', '2021-07-03', '3', '150000', '2', '2', '2'),
 ('수술', '2021-07-02', '3', '200000', '3', '3', '3'),
 ('교통사고', '2021-07-04', '3', '250000', '4', '4', '4'),
-('기타', '2021-07-01', '3', '300000', '5', '5', '5'),
-('기타', '2021-07-05', '3', '350000', '6', '6', '6'),
-('코로나', '2021-07-06', '5', '140000', '7', '7', '1'),
-('코로나', '2021-07-02', '5', '210000', '8', '8', '2'),
-('코로나', '2021-07-04', '5', '280000', '9', '9', '3'),
-('병원', '2021-07-05', '1', '100000', '10', '10', '4'),
-('기타', '2021-07-03', '1', '120000', '11', '11', '5'),
-('코로나', '2021-07-02', '1', '140000', '12', '12', '6'),
-('코로나', '2021-07-01', '7', '200000', '13', '13', '1'),
-('기타', '2021-07-05', '7', '300000', '14', '14', '2'),
-('개인사유', '2021-07-04', '7', '400000', '15', '15', '3');
+('기타', '2021-07-01', '3', '300000', '5', '1', '5'),
+('기타', '2021-07-05', '3', '350000', '6', '1', '6'),
+('코로나', '2021-07-06', '5', '140000', '7', '1', '1'),
+('코로나', '2021-07-02', '5', '210000', '8', '1', '2'),
+('코로나', '2021-07-04', '5', '280000', '9', '1', '3'),
+('병원', '2021-07-05', '1', '100000', '10', '1', '4'),
+('기타', '2021-07-03', '1', '120000', '11', '1', '5'),
+('코로나', '2021-07-02', '1', '140000', '12', '1', '6'),
+('코로나', '2021-07-01', '7', '200000', '13', '1', '1'),
+('기타', '2021-07-05', '7', '300000', '14', '1', '2'),
+('개인사유', '2021-07-04', '7', '400000', '15', '1', '3');
 
 INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID, Service_ID)
 VALUE 
