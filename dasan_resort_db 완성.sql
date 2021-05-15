@@ -6,10 +6,10 @@ CREATE TABLE CUSTOMER
     `Cust_ID`                                     INT            NOT NULL    AUTO_INCREMENT COMMENT '고객 ID', 
     `Cust_webID`                                  VARCHAR(15)    NOT NULL    COMMENT '고객 홈페이지 ID',
     `Cust_Name`                                   VARCHAR(15)    NOT NULL    COMMENT '고객 이름', 
-    `Cust_Contact`                                VARCHAR(15)            NOT NULL    COMMENT '고객 연락처', 
+    `Cust_Contact`                                INT            NOT NULL    COMMENT '고객 연락처', 
     `Cust_Email`                                  VARCHAR(30)    NOT NULL    COMMENT '고객 이메일', 
-    `Cust_Address`                                VARCHAR(50)    NOT NULL    COMMENT '고객 주소', 
-    `Cust_Password`                               varchar(15)            NOT NULL    COMMENT '고객 비밀번호', 
+    `Cust_Address`                                VARCHAR(15)    NOT NULL    COMMENT '고객 주소', 
+    `Cust_Password`                               INT            NOT NULL    COMMENT '고객 비밀번호', 
     `Cust_CurrentMile`                            INT            NOT NULL    DEFAULT 0   COMMENT '고객 현재 마일리지[지불금액*0.01-기사용 마일리지]', 
     `Cust_Usedmile`                               INT            NOT NULL    DEFAULT 0   COMMENT '고객 기사용 마일리지', 
     CONSTRAINT  PRIMARY KEY (Cust_ID)
@@ -96,8 +96,8 @@ CREATE TABLE ROOMPRICE
 (
     `RoomPrice_ID`  INT           NOT NULL    AUTO_INCREMENT COMMENT '객실가격ID', 
     `Room_Price`    INT           NOT NULL    COMMENT '객실 가격', 
-    `Room_Week`     BOOL       NOT NULL    DEFAULT 0   COMMENT '객실 - 주중/주말', 
-    `Room_Peak`     BOOL        NOT NULL    DEFAULT 0   COMMENT '객실 - 성수기/비성수기', 
+    `Room_Week`     BIT(1)        NOT NULL    DEFAULT 0   COMMENT '객실 - 주중/주말', 
+    `Room_Peak`     BIT(1)        NOT NULL    DEFAULT 0   COMMENT '객실 - 성수기/비성수기', 
     `Room_ID`       INT           NOT NULL    COMMENT '객실ID', 
     `Room_Type`     VarChar(15)   NOT NULL    COMMENT '객실 타입', 
     CONSTRAINT  PRIMARY KEY (RoomPrice_ID)
@@ -109,7 +109,7 @@ ALTER TABLE ROOMPRICE COMMENT '객실 가격 테이블';
 CREATE TABLE ROOMSTATE
 (
     `Room_ID`          INT       NOT NULL    AUTO_INCREMENT COMMENT '객실ID', 
-    `RoomState_State`  BOOL    NULL        COMMENT '객실 이용현황', 
+    `RoomState_State`  BIT(1)    NULL        COMMENT '객실 이용현황', 
     `Cust_ID`          INT       NOT NULL    COMMENT '고객ID', 
     `Booking_ID`       INT       NOT NULL    COMMENT '예약ID', 
     `Service_ID`       INT       NOT NULL    COMMENT '서비스ID', 
@@ -123,8 +123,8 @@ CREATE TABLE ROOM
 (
     `Room_ID`        INT            NOT NULL    AUTO_INCREMENT COMMENT '객실ID', 
     `Room_Type`      VarChar(15)    NOT NULL    COMMENT '객실 타입', 
-    `Room_AvailNo.`  INT    NOT NULL    COMMENT '이용가능한 사람 수', 
-    `Room_ResState`  BOOL         NULL        DEFAULT 0   COMMENT '객실 예약현황', 
+    `Room_AvailNo.`  VarChar(15)    NOT NULL    COMMENT '이용가능한 객실 번호', 
+    `Room_ResState`  BIT(1)         NULL        DEFAULT 0   COMMENT '객실 예약현황', 
     `Bed_ID`         INT            NOT NULL    COMMENT '침대ID', 
     CONSTRAINT  PRIMARY KEY (Room_ID)
 );
@@ -208,45 +208,6 @@ CREATE TABLE RESTAURANTORDER
 
 ALTER TABLE RESTAURANTORDER COMMENT '레스토랑 주문 테이블';
 
-CREATE TABLE SHUTTLE
-(
-    `Shuttle_ID`                                 INT         NOT NULL    AUTO_INCREMENT COMMENT '셔틀 번호', 
-    `Shuttle_Type`                               VarChar(15) CHECK (Shuttle_Type IN ('버스'))    NOT NULL    COMMENT '셔틀 타입', 
-    `Shuttle_Route`                               VarChar(15)     NOT NULL    COMMENT '셔틀 루트', 
-    `Shuttle_Depart`                       VarChar(15)   CHECK (Shuttle_Depart IN ('리조트','공항','화성행궁'))    NOT NULL    DEFAULT 0   COMMENT '셔틀 출발지', 
-    `Shuttle_Arrive`                                      VarChar(15)   CHECK (Shuttle_Arrive IN ('리조트','공항','화성행궁'))      NOT NULL    COMMENT '셔틀 도착지', 
-    `Shuttle_DepartTime`                                      TIME    CHECK (Shuttle_DepartTime IN ('09:00','10:00','20:00'))    NOT NULL    COMMENT '셔틀 출발시간', 
-    `Cust_ID`                                     INT        NOT NULL    COMMENT '고객ID', 
-    CONSTRAINT  PRIMARY KEY (Shuttle_ID)
-);
-
-ALTER TABLE SHUTTLE COMMENT '셔틀버스 테이블';
-
-CREATE TABLE BOOKCANCEL
-(
-    `Can_ID`                                 INT         NOT NULL    AUTO_INCREMENT COMMENT '취소 번호', 
-    `Can_Reason`                               VarChar(15)     NOT NULL    COMMENT '취소 이유', 
-    `Can_date`                               DATETIME(6)    NOT NULL    COMMENT '취소 날짜', 
-    `Can_Datedif`                       DATE         NOT NULL    DEFAULT 0   COMMENT '취소와 날짜차이', 
-    `Can_Refund`                                      INT         NOT NULL    COMMENT '취소 환불총액', 
-    `Booking_ID`                                      INT        NOT NULL    COMMENT '예약 번호', 
-    `Pol_ID`                                     INT        NOT NULL    COMMENT '정책 번호', 
-    `Room_ID`        INT            NOT NULL    NOT NULL COMMENT '객실ID',
-    CONSTRAINT  PRIMARY KEY (Can_ID)
-);
-
-ALTER TABLE BOOKCANCEL COMMENT '예약취소 테이블';
-
-CREATE TABLE CANCELPOLICY
-(
-    `Pol_ID`                                 INT         NOT NULL    AUTO_INCREMENT COMMENT '정책 번호', 
-    `Pol_Datedif`                              DATE     NOT NULL    COMMENT '날짜차이 정의', 
-    `Pol_RefundDate`                               DATETIME(6)    NOT NULL    COMMENT '환불율 정책', 
-    CONSTRAINT  PRIMARY KEY (Pol_ID)
-);
-
-ALTER TABLE CANCELPOLICY COMMENT '노쇼 정책 테이블';
-
 -- 주석 --
 
 ALTER TABLE PAYMENT
@@ -284,6 +245,10 @@ ALTER TABLE SERVICEREQUIREMENT
 ALTER TABLE BOOKING
     ADD CONSTRAINT FK_BOOKING_Cust_ID_CUSTOMER_Cust_ID FOREIGN KEY (Cust_ID)
         REFERENCES CUSTOMER (Cust_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE BOOKING
+    ADD CONSTRAINT FK_BOOKING_Banquet_ID_BANQUET_Banquet_ID FOREIGN KEY (Banquet_ID)
+        REFERENCES BANQUET (Banquet_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE BOOKING
     ADD CONSTRAINT FK_BOOKING_RoomPrice_ID_ROOMPRICE_RoomPrice_ID FOREIGN KEY (RoomPrice_ID)
@@ -353,23 +318,8 @@ ALTER TABLE RESTAURANTORDER
     ADD CONSTRAINT FK_RESTAURANTORDER_Cust_ID_CUSTOMER_Cust_ID FOREIGN KEY (Cust_ID)
         REFERENCES CUSTOMER (Cust_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE SHUTTLE
-    ADD CONSTRAINT FK_SHUTTLE_Cust_ID_CUSTOMER_Cust_ID FOREIGN KEY (Cust_ID)
-        REFERENCES CUSTOMER (Cust_ID) ON DELETE CASCADE ON UPDATE CASCADE;
-        
-ALTER TABLE BOOKCANCEL
-    ADD CONSTRAINT FK_BOOKCANCEL_Booking_ID_BOOKING_Booking_ID FOREIGN KEY (Booking_ID)
-        REFERENCES BOOKING (Booking_ID) ON DELETE CASCADE ON UPDATE CASCADE;
-        
-ALTER TABLE BOOKCANCEL
-    ADD CONSTRAINT FK_BOOKCANCEL_Room_ID_ROOMSTATE_Room_ID FOREIGN KEY (Room_ID)
-        REFERENCES ROOMSTATE (Room_ID) ON DELETE CASCADE ON UPDATE CASCADE;
-        
-ALTER TABLE BOOKCANCEL
-    ADD CONSTRAINT FK_BOOKCANCEL_Pol_ID_CANCELPOLICY_Pol_ID FOREIGN KEY (Pol_ID)
-        REFERENCES CANCELPOLICY (Pol_ID) ON DELETE CASCADE ON UPDATE CASCADE;
-        
 -- ★desc★ 하는법 --
+desc banquet;
 desc bed;
 desc booking;
 desc cardkey;
@@ -385,8 +335,3 @@ desc roomprice;
 desc roomstate;
 desc service;
 desc servicerequirement;
-
-
-
-
-
