@@ -85,7 +85,6 @@ CREATE TABLE BOOKING
     `RoomPrice_ID`                                                    INT            NOT NULL    COMMENT '객실가격ID', 
     `Booking_TotalAmount`                                             INT            NOT NULL    DEFAULT 0   COMMENT '예약 총금액[RoomPrice_Amount, Bed_PlusState, PeopleNo]', 
     `Booking_method`                                                  VARCHAR(15)    CHECK (Booking_method IN ('홈페이지','전화','방문'))    NOT NULL    COMMENT '예약 수단', 
-    `Shuttle_ID`                                                      INT            NULL    COMMENT '셔틀 번호 (신청)', 
     CONSTRAINT  PRIMARY KEY (Booking_ID)
 );
 
@@ -353,9 +352,9 @@ ALTER TABLE RESTAURANTORDER
     ADD CONSTRAINT FK_RESTAURANTORDER_Cust_ID_CUSTOMER_Cust_ID FOREIGN KEY (Cust_ID)
         REFERENCES CUSTOMER (Cust_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE BOOKING
-    ADD CONSTRAINT FK_BOOKING_BOOKING_ID_SHUTTLE_SHUTTLE_ID FOREIGN KEY (Shuttle_ID)
-        REFERENCES SHUTTLE (Shuttle_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+-- ALTER TABLE BOOKING
+--    ADD CONSTRAINT FK_BOOKING_BOOKING_ID_SHUTTLE_SHUTTLE_ID FOREIGN KEY (Shuttle_ID)
+--        REFERENCES SHUTTLE (Shuttle_ID) ON DELETE CASCADE ON UPDATE CASCADE;
         
 ALTER TABLE BOOKCANCEL
     ADD CONSTRAINT FK_BOOKCANCEL_Booking_ID_BOOKING_Booking_ID FOREIGN KEY (Booking_ID)
@@ -513,9 +512,9 @@ INSERT INTO ROOMPRICE (Room_Price, Room_Week, Room_Peak, Room_ID, Room_Type) VAL
 ('700000', '0', '0', '21', '수페리어룸 suite'),('700000', '1', '0', '22', '수페리어룸 suite'),('700000', '0', '1', '23', '수페리어룸 suite'),('700000', '1', '1', '24', '수페리어룸 suite');
 
 
-INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Room_Choice, Bed_PlusState, RoomPrice_ID, Booking_TotalAmount, Booking_method) 
+INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Room_Choice, Bed_PlusState, RoomPrice_ID, Booking_TotalAmount, Booking_method)
 VALUE
-('2021-06-08 12:11:55','2021-06-16', '2021-06-11', '7', '1',  '2', '디럭스룸', '0', '1', '200000', '홈페이지'),
+('2021-06-08 12:11:55','2021-06-16', '2021-06-11', '7', '1', '디럭스룸', '0', '1', '200000', '홈페이지'),
 ('2021-06-08 13:12:01','2021-06-16', '2021-06-17', '2',  '2', '디럭스룸', '0', '1', '200000', '전화'),
 ('2021-06-08 15:52:33','2021-06-16', '2021-06-17', '5',  '4', '비즈니스룸', '0', '5', '320000', '홈페이지'),
 ('2021-06-09 07:11:12','2021-06-17', '2021-06-18', '7',  '4', '비즈니스룸', '1', '5', '340000', '홈페이지'),
@@ -540,9 +539,7 @@ VALUE
 ('2021-06-20 13:52:41','2021-06-27', '2021-06-28', '42',  '6', '수페리어룸', '1', '10', '460000', '홈페이지'),
 ('2021-06-21 12:51:33','2021-05-18', '2021-06-28', '45',  '6', '수페리어룸', '1', '10', '460000', '방문');
 
-select dbms_random.value(1,5) from dual;
 
-select cid from restaurant order by rand() limit 10
 
 -- 4번 순서 --
 
