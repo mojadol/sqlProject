@@ -196,11 +196,11 @@ ALTER TABLE RESTAURANT COMMENT '식당 테이블';
 CREATE TABLE RESTAURANTORDER
 (
     `ResOrder_ID`                                 INT         NOT NULL    AUTO_INCREMENT COMMENT '주문 번호', 
+    `Res_ID`                                      INT        NOT NULL    COMMENT '레스토랑ID', 
     `ResOrder_Menu`                               VarChar(15)     CHECK (ResOrder_Menu IN ('짜장면','우동','비빔밥','파스타','칵테일','맥주','바삭한 치킨'))    NOT NULL    COMMENT '주문 메뉴', 
     `ResOrder_Date`                               DATETIME(6)    NOT NULL    COMMENT '주문 날짜 및 시간', 
     `ResOrder_TotalAmount`                       INT         NOT NULL    DEFAULT 0   COMMENT '주문 총액, [Res_Menu, Res_Price]', 
     `KEY_ID`                                      INT         NOT NULL    COMMENT '키ID', 
-    `Res_ID`                                      INT        NOT NULL    COMMENT '레스토랑ID', 
     `Cust_ID`                                     INT        NOT NULL    COMMENT '고객ID', 
     CONSTRAINT  PRIMARY KEY (ResOrder_ID, ResOrder_Date)
 );
@@ -514,7 +514,7 @@ INSERT INTO ROOMPRICE (Room_Price, Room_Week, Room_Peak, Room_ID, Room_Type) VAL
 
 INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Room_Choice, Bed_PlusState, RoomPrice_ID, Booking_TotalAmount, Booking_method)
 VALUE
-('2021-06-08 12:11:55','2021-06-16', '2021-06-11', '7', '1', '디럭스룸', '0', '1', '200000', '홈페이지'),
+('2021-06-08 12:11:55','2021-06-16', '2021-06-11', '1', '2', '디럭스룸', '0', '1', '200000', '홈페이지'),
 ('2021-06-08 13:12:01','2021-06-16', '2021-06-17', '2',  '2', '디럭스룸', '0', '1', '200000', '전화'),
 ('2021-06-08 15:52:33','2021-06-16', '2021-06-17', '5',  '4', '비즈니스룸', '0', '5', '320000', '홈페이지'),
 ('2021-06-09 07:11:12','2021-06-17', '2021-06-18', '7',  '4', '비즈니스룸', '1', '5', '340000', '홈페이지'),
@@ -560,24 +560,26 @@ INSERT INTO BOOKCANCEL (Can_Reason, Can_CurrentDate, Can_Datedif, Can_Refund, Bo
 				and cust_id in (1,45));
 -------------------
 
+select * from bookcancel;
+
 
 INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
 VALUE 
-('11','1','17','9','1'),
-('106','1','19','10','2'),
-('15','1','22','11','3'),
-('43','1','23','12','4'),
-('58','1','24','13','4'),
-('380','1','32','17','3'),
-('33','1','34','18','7'),
-('45','1','35','19','1'),
-('70','1','36','20','4'),
-('220','1','39','22','2'),
-('1','1','1','1','1'),
-('2','1','2','2','2'),
-('101','1','5','3','3'),
-('102','1','7','4','4'),
-('103','1','9','5','4');
+('11','1','17','9'),
+('106','1','19','10'),
+('15','1','22','11'),
+('43','1','23','12'),
+('58','1','24','13'),
+('380','1','32','17'),
+('33','1','34','18'),
+('45','1','35','19'),
+('70','1','36','20'),
+('220','1','39','22'),
+('1','1','1','1'),
+('2','1','2','2'),
+('101','1','5','3'),
+('102','1','7','4'),
+('103','1','9','5');
 
 INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
 (select room_id, '0', null, null from room);
@@ -585,20 +587,29 @@ INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
 --  여기서부턴 시행착오 --
 
 INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
-(select room.room_id,
+(select room.room_id, (select
 		Case 
 			when (current_date() between booking_checkindate and booking_checkoutdate) then '1'
             else '0'
-		end as case_roomstate,
-		booking.cust_id, booking_id from room, booking;
+		end as case_roomstate),
+		cust_id, booking_id from room, booking
+        where cust_id in (select cust_id from booking)
+        and room_id in (select * from (SELECT room_id FROM room
+        group by room_choice having count(room_choice) 
+        ORDER BY RAND()) as tmp));
+
+select * from roomstate;
+
 
 update roomstate 
 	set roomstate_state = 
 		(Case 
 			when Current_date() between booking_checkindate and booking_checkoutdate then '1'
-			else '0' end)
+			else '0' end )
 		where (select roomstate.room_id from roomstate
-        inner join (select room_id from room order by rand() limit 20) as joins);
+        where cust_id in (select cust_id from booking)
+        and room_id in (select * from (SELECT room_id FROM room
+        ORDER BY RAND()) as tmp));
         
         where roomstate.room_id in (select room_id from room order by rand() limit 20);
 
@@ -619,6 +630,7 @@ INSERT INTO CARDKEY(Room_ID, Cust_ID) VALUE
 -- 테스트--
 insert into cardkey(room_id, cust_id) (select room_id, cust_id from roomstate);  ---- 완료
 
+select * from cardkey;
 
 -- 6번 순서 --
 
@@ -636,6 +648,17 @@ INSERT INTO SERVICEREQUIREMENT(Service_ID, SerReq_Count, SerReq_TotalAmount, KEY
 ('7','6','210000','KEY_ID','39'),('1','1','10000','1','1'),('1','1','10000','2','2'),('1','1','15000','3','5'),('1','1','15000','4','7'),('1','1','15000','5','9');
 
 
+INSERT INTO SERVICEREQUIREMENT(Service_ID, SerReq_Count, SerReq_TotalAmount, KEY_ID, Cust_ID)
+	(select service_id,
+			(floor(rand() * 5)) as randnum,
+				(select * from (select service_price * randnum) as temp),
+					key_id, cust_id
+						from service, cardkey); 
+
+
+
+
+
 INSERT INTO FACILITYREQUIREMENT (Fac_ID, Fac_Count, FacReq_TotalAmount, KEY_ID, Cust_ID) VALUE ('10','4','40000','KEY_ID','32'),
 ('5','2','10000','KEY_ID','34'),
 ('7','2','0','KEY_ID','34'),
@@ -647,9 +670,18 @@ INSERT INTO FACILITYREQUIREMENT (Fac_ID, Fac_Count, FacReq_TotalAmount, KEY_ID, 
 ('6','6','42000','KEY_ID','39'),
 ('9','6','60000','KEY_ID','39'),('1', '2', '15000', '1', '1'),('2', '3', '30000', '2', '2'),('3', '3', '30000', '3', '5'),('4', '3', '30000', '4', '7'),('5', '2', '12000', '5', '9');
 
+INSERT INTO FACILITYREQUIREMENT (Fac_ID, Fac_Count, FacReq_TotalAmount, KEY_ID, Cust_ID)
+	(select fac_id,
+			(floor(rand() * 5)) as randnum,
+				(select * from (select fac_price * randnum) as temp),
+					key_id, cust_id
+						from facility, cardkey); 
 
 
-INSERT INTO RESTAURANTORDER (ResOrder_Menu, ResOrder_Date, ResOrder_TotalAmount, KEY_ID, Res_ID, Cust_ID) VALUE ('짜장면', '2021-06-24 19:00:00', '5000', 'KEY_ID', '1', '32'),
+
+
+INSERT INTO RESTAURANTORDER (ResOrder_Menu, ResOrder_Date, ResOrder_TotalAmount, KEY_ID, Res_ID, Cust_ID)
+VALUE ('짜장면', '2021-06-24 19:00:00', '5000', 'KEY_ID', '1', '32'),
 ('우동', '2021-06-25 9:00:00', '4000', 'KEY_ID', '2', '32'),
 ('바삭한 치킨', '2021-06-24 19:00:00', '20000', 'KEY_ID', '7', '34'),
 ('비빔밥', '2021-06-24 20:00:00', '6000', 'KEY_ID', '3', '34'),
@@ -664,6 +696,12 @@ INSERT INTO RESTAURANTORDER (ResOrder_Menu, ResOrder_Date, ResOrder_TotalAmount,
 ('파스타', '2021-06-17 19:00:00', '15000', '4', '4', '7'),
 ('바삭한 치킨', '2021-06-17 19:00:00', '20000', '5', '7', '9');
 
+INSERT INTO RESTAURANTORDER (Res_ID, ResOrder_Menu, ResOrder_Date, ResOrder_TotalAmount, KEY_ID, Cust_ID)
+	(select fac_id,
+			(floor(rand() * 5)) as randnum,
+				(select * from (select fac_price * randnum) as temp),
+					key_id, cust_id
+						from facility, cardkey);
 
 -- 7번 순서 --
 
