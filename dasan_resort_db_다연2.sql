@@ -198,11 +198,11 @@ CREATE TABLE RESTAURANTORDER
     `ResOrder_ID`                                 INT         NOT NULL    AUTO_INCREMENT COMMENT '주문 번호', 
     `Res_ID`                                      INT        NOT NULL    COMMENT '레스토랑ID', 
     `ResOrder_Menu`                               VarChar(15)     CHECK (ResOrder_Menu IN ('짜장면','우동','비빔밥','파스타','칵테일','맥주','바삭한 치킨'))    NOT NULL    COMMENT '주문 메뉴', 
-    `ResOrder_Date`                               DATETIME(6)    NOT NULL    COMMENT '주문 날짜 및 시간', 
+	`ResOrder_Count`                              INT    NOT NULL    COMMENT '주문요청 회수', 
     `ResOrder_TotalAmount`                       INT         NOT NULL    DEFAULT 0   COMMENT '주문 총액, [Res_Menu, Res_Price]', 
     `KEY_ID`                                      INT         NOT NULL    COMMENT '키ID', 
     `Cust_ID`                                     INT        NOT NULL    COMMENT '고객ID', 
-    CONSTRAINT  PRIMARY KEY (ResOrder_ID, ResOrder_Date)
+    CONSTRAINT  PRIMARY KEY (ResOrder_ID)
 );
 
 ALTER TABLE RESTAURANTORDER COMMENT '레스토랑 주문 테이블';
@@ -657,8 +657,6 @@ INSERT INTO SERVICEREQUIREMENT(Service_ID, SerReq_Count, SerReq_TotalAmount, KEY
 
 
 
-
-
 INSERT INTO FACILITYREQUIREMENT (Fac_ID, Fac_Count, FacReq_TotalAmount, KEY_ID, Cust_ID) VALUE ('10','4','40000','KEY_ID','32'),
 ('5','2','10000','KEY_ID','34'),
 ('7','2','0','KEY_ID','34'),
@@ -679,7 +677,6 @@ INSERT INTO FACILITYREQUIREMENT (Fac_ID, Fac_Count, FacReq_TotalAmount, KEY_ID, 
 
 
 
-
 INSERT INTO RESTAURANTORDER (ResOrder_Menu, ResOrder_Date, ResOrder_TotalAmount, KEY_ID, Res_ID, Cust_ID)
 VALUE ('짜장면', '2021-06-24 19:00:00', '5000', 'KEY_ID', '1', '32'),
 ('우동', '2021-06-25 9:00:00', '4000', 'KEY_ID', '2', '32'),
@@ -696,15 +693,206 @@ VALUE ('짜장면', '2021-06-24 19:00:00', '5000', 'KEY_ID', '1', '32'),
 ('파스타', '2021-06-17 19:00:00', '15000', '4', '4', '7'),
 ('바삭한 치킨', '2021-06-17 19:00:00', '20000', '5', '7', '9');
 
-INSERT INTO RESTAURANTORDER (Res_ID, ResOrder_Menu, ResOrder_Date, ResOrder_TotalAmount, KEY_ID, Cust_ID)
-	(select fac_id,
+INSERT INTO RESTAURANTORDER (Res_ID, ResOrder_Menu, ResOrder_count, ResOrder_TotalAmount, KEY_ID, Cust_ID)
+	(select res_id, res_menu,
 			(floor(rand() * 5)) as randnum,
-				(select * from (select fac_price * randnum) as temp),
+				(select * from (select res_menu_price * randnum) as temp),
 					key_id, cust_id
-						from facility, cardkey);
+						from restaurant, cardkey);
+
+select * from restaurantorder;
+
+
+
 
 -- 7번 순서 --
 
 INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, ResOrder_ID, SerReq_ID, FacReq_ID, Cust_ID) VALUE ('36000', '2021-06-05 19:00:00', '카드키', '1', '1', '1', '1', '1'),('231000', '2021-06-21 19:00:00', '신용카드', '1', '1', '1', '1', '20'),
 ('361000', '2021-06-21 20:00:00', '신용카드', '2', '2', '2', '2', '22');
 
+INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, ResOrder_ID, SerReq_ID, FacReq_ID, Cust_ID)
+	(SELECT +s2+s3
+FROM
+(select key_id,sum(serreq_totalamount) s1
+                from servicerequirement
+                    group by key_id) t1
+INNER JOIN 
+            (select key_id,sum(facreq_totalamount) s2
+                from facilityrequirement
+                    group by key_id) t2 ON t1.key_id = t2.key_id
+INNER JOIN
+            (select key_id,sum(resorder_totalamount) s3
+                from restaurantorder
+                    group by key_id) t3 ON t2.key_id = t3.key_id
+                    );
+                    
+          
+          
+          
+          SELECT t1.key_id, s1+s2+s3
+FROM
+(select key_id,sum(serreq_totalamount) s1
+                from servicerequirement
+                    group by key_id) t1
+INNER JOIN 
+            (select key_id,sum(facreq_totalamount) s2
+                from facilityrequirement
+                    group by key_id) t2 ON t1.key_id = t2.key_id
+INNER JOIN
+            (select key_id,sum(resorder_totalamount) s3
+                from restaurantorder
+                    group by key_id) t3 ON t2.key_id = t3.key_id;
+          
+          
+          
+(select sum(serreq_totalamount) 
+	from
+		(select key_id, service_id, serreq_totalamount
+		from servicerequirement) s1
+			union
+		(select key_id, fac_id, facreq_totalamount
+		from facilityrequirement) s2
+			union
+		(select key_id, resorder_id, ResOrder_TotalAmount
+		from restaurantorder) s3
+    );
+
+
+
+select * from
+   (select key_id, service_id, serreq_totalamount
+	from servicerequirement) as total 
+    union
+	(select key_id, fac_id, facreq_totalamount
+	from facilityrequirement) 
+    union
+	(select key_id, resorder_id, ResOrder_TotalAmount
+	from restaurantorder); 
+		
+
+
+
+ (select key_id, temp1+temp2+temp3
+		from
+			(select sum(serreq_totalamount)
+				from servicerequirement
+					group by key_id) as temp1
+                    union
+			(select sum(facreq_totalamount)
+				from facilityrequirement직관적인거야
+					group by key_id) 
+                    union
+			(select sum(resorder_totalamount)
+				from restaurantorder as temp3
+					group by key_id), key_id
+	);           
+            
+(select sum(serreq_totalamount)
+				from servicerequirement
+					group by key_id);
+                
+                
+(select servicerequirement.key_id, serreq_totalamount, facreq_totalamount
+	from servicerequirement
+	full outer join facilityrequirement
+    on servicerequirement.key_id=facilityrequirement.key_id);
+
+
+		from( 
+			select serreq_totalamount from servicerequirement as temp
+					union
+			select facreq_totalamount from facilityrequirement as temp
+                    union
+			select resorder_totalamount from restaurantorder as temp
+            ) as temp2
+				group by key_id
+		)) as temp3 )));          
+          
+          
+          
+(select * from (
+(select sum(temp2)
+		from( 
+			select serreq_totalamount from servicerequirement as temp
+					union
+			select facreq_totalamount from facilityrequirement as temp
+                    union
+			select resorder_totalamount from restaurantorder as temp
+            ) as temp2
+				group by key_id
+		)) as temp3 )));
+        
+	(select 
+			(select sum(serreq_totalamount)
+				from servicerequirement
+					) +
+			(select sum(facreq_totalamount)
+				from facilityrequirement
+					) +
+			(select sum(resorder_totalamount)
+				from restaurantorder
+					) as temp
+				from cardkey
+					group by key_id
+		);
+
+(select servicerequirement.key_id, 
+	(select sum(serreq_totalamount)
+		from servicerequirement
+			group by servicerequirement.key_id),
+	(select sum(facreq_totalamount)
+		from facilityrequirement
+			group by facilityrequirement.key_id)
+		from servicerequirement
+    inner join facilityrequirement
+    on servicerequirement.key_id=facilityrequirement.key_id);
+
+select (
+(select sum(serreq_totalamount)
+		from servicerequirement
+			group by servicerequirement.key_id)+
+(select sum(facreq_totalamount)
+		from facilityrequirement
+			group by facilityrequirement.key_id));
+
+(select
+	sum(serreq_totalamount), sum(facreq_totalamount)
+    from
+		servicerequirement,
+		facilityrequirement
+        group by servicerequirement.key_id, facilityrequirement.key_id);
+
+select * from servicerequirement
+where key_id = 1;
+
+
+(select
+(select sum(serreq_totalamount)
+		from servicerequirement
+			group by servicerequirement.key_id),
+	(select sum(facreq_totalamount)
+		from facilityrequirement
+			group by facilityrequirement.key_id)
+		from servicerequirement
+    inner join facilityrequirement
+    on servicerequirement.key_id=facilityrequirement.key_id);
+
+(select sum(serreq_totalamount), sum(facreq_totalamount)
+	from (select sum(serreq_totalamount)
+		from servicerequirement
+			group by servicerequirement.key_id) as temp1
+		inner join
+			(select sum(facreq_totalamount)
+		from facilityrequirement
+			group by facilityrequirement.key_id) as temp2
+        on servicerequirement.key_id = facilityrequirement.key_id
+        );
+ 
+(select servicerequirement.key_id, sum(serreq_totalamount)
+	from servicerequirement
+		left join facilityrequirement
+	on servicerequirement.key_id=facilityrequirement.key_id
+    group by key_id);
+            
+            
+select * from servicerequirement;
