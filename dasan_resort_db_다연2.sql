@@ -160,7 +160,7 @@ CREATE TABLE FINE
     `Fine_Amount`  INT      NOT NULL    DEFAULT 0   COMMENT '벌금액', 
     `Fine_reason`  VARCHAR(15)    CHECK (Fine_reason IN ('취사','흡연','카드키 분실', '퇴실 지연'))    NOT NULL    COMMENT '벌금 사유', 
     `Cust_ID`      INT        NOT NULL    COMMENT '고객이름', 
-    `Room_ID`      INT        NOT NULL    COMMENT '방이름', 
+    `key_ID`      INT        NOT NULL    COMMENT '키 이름', 
     CONSTRAINT  PRIMARY KEY (Fine_ID)
 );
 
@@ -327,8 +327,8 @@ ALTER TABLE FINE
         REFERENCES CUSTOMER (Cust_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE FINE
-    ADD CONSTRAINT FK_FINE_Room_ID_ROOMSTATE_Room_ID FOREIGN KEY (Room_ID)
-        REFERENCES ROOMSTATE (Room_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+    ADD CONSTRAINT FK_FINE_key_ID_ROOMSTATE_key_ID FOREIGN KEY (key_ID)
+        REFERENCES cardkey (key_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE CARDKEY
     ADD CONSTRAINT FK_CARDKEY_Cust_ID_ROOMSTATE_Cust_ID FOREIGN KEY (Cust_ID)
@@ -913,6 +913,8 @@ VALUE
 -- 4번 순서 --
 
 
+select * from booking;
+
 INSERT INTO BOOKCANCEL (Can_Reason, Can_CurrentDate, Can_Datedif, Can_Refund, Booking_ID, Pol_ID, cust_id)
 (select '코로나', current_date(), datediff(Booking_CheckInDate, current_date()) as dif,
 	booking_totalamount *
@@ -939,9 +941,9 @@ VALUE
 ('45','1','35','19'),
 ('70','1','36','20'),
 ('220','1','39','22'),
-('1','1','1','10'),
+('1','1','11','31'),
 ('2','1','2','2'),
-('101','1','5','2'),
+('101','1','12','8'),
 ('102','1','7','4'),
 ('103','1','9','5'),
 ('46', '1','46', '25'),
@@ -968,15 +970,17 @@ VALUE
 ('285', '1', '95', '53'),
 ('107', '1', '92', '50');
 
+select cust_id from roomstate;
+
 -- test --
 -- INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
 -- (select room_id, '0', null, null from room);
 --
 
-UPDATE roomstate
-INNER JOIN roomstate ON cardkey.room_id = roomstate.room_id 
-    AND roomstate.roomstate_state =1 
-SET cardkey.cust_id=roomstate.cust_id;
+-- UPDATE roomstate
+-- INNER JOIN roomstate ON cardkey.room_id = roomstate.room_id 
+--    AND roomstate.roomstate_state =1 
+-- SET cardkey.cust_id=roomstate.cust_id;
 
 
 select * from roomstate;
@@ -1023,11 +1027,22 @@ INSERT INTO RESTAURANTORDER (Res_ID, ResOrder_Menu, ResOrder_count, ResOrder_Tot
 						from restaurant, cardkey
 							where not (cust_id is null)); 
 
+INSERT INTO fine (fine_amount, fine_reason, cust_id, key_id)
+select if (r1 = '흡연', '50000','100000'), r1, t2.cust_id, t2.key_id
+	from (select cust_id, key_id 
+				from cardkey
+					group by cust_id) t1
+				inner join 
+		(select cust_id, key_id, if(rand() > 0.5, '흡연', '취사') r1
+			from cardkey
+				group by cust_id) t2 on t1.cust_id = t2.cust_id
+                ;
+
 
 -- 7번 순서 --
 
 INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, CUST_id)
-(select s1+s2+s3, t4.booking_checkoutdate, 
+(select s1+s2+s3+s4, t5.booking_checkoutdate, 
 if(rand() > 0.5, '신용카드', if (rand() > 0.7, '수표', '현금'))
 , t1.key_id, t1.cust_id from
 			(select cust_id,key_id,sum(serreq_totalamount) s1
@@ -1042,6 +1057,10 @@ if(rand() > 0.5, '신용카드', if (rand() > 0.7, '수표', '현금'))
                 from restaurantorder
                     group by key_id) t3 ON t2.key_id = t3.key_id
 						INNER JOIN
+            (select cust_id,key_id,sum(fine_amount) s4
+                from fine
+                    group by key_id) t4 ON t3.key_id = t4.key_id
+						INNER JOIN                        
 			(select cust_id, booking_checkoutdate,
 					(case when booking_checkoutdate 
 						then 
@@ -1052,8 +1071,7 @@ if(rand() > 0.5, '신용카드', if (rand() > 0.7, '수표', '현금'))
 								INTERVAL rand() * 60 minute),
 								INTERVAL floor(rand() * 60) second)
 							end)
-								from booking) t4 on t1.cust_id = t4.cust_id
+								from booking) t5 on t1.cust_id = t5.cust_id
                     );
-                    
-                    
-select * from payment;
+  
+  
