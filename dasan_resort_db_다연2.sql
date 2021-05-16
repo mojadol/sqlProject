@@ -331,12 +331,12 @@ ALTER TABLE FINE
         REFERENCES ROOMSTATE (Room_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE CARDKEY
-    ADD CONSTRAINT FK_CARDKEY_Cust_ID_CUSTOMER_Cust_ID FOREIGN KEY (Cust_ID)
-        REFERENCES CUSTOMER (Cust_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+    ADD CONSTRAINT FK_CARDKEY_Cust_ID_ROOMSTATE_Cust_ID FOREIGN KEY (Cust_ID)
+        REFERENCES ROOMSTATE (Cust_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE CARDKEY
-    ADD CONSTRAINT FK_CARDKEY_Room_ID_ROOMSTATE_ROOM_ID FOREIGN KEY (Room_ID)
-        REFERENCES ROOMSTATE (Room_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+    ADD CONSTRAINT FK_CARDKEY_Room_ID_ROOM_ROOM_ID FOREIGN KEY (Room_ID)
+        REFERENCES ROOM (Room_ID) ON DELETE CASCADE ON UPDATE CASCADE;
         
 ALTER TABLE RESTAURANTORDER
     ADD CONSTRAINT FK_RESTAURANTORDER_KEY_ID_CARDKEY_KEY_ID FOREIGN KEY (KEY_ID)
@@ -542,23 +542,18 @@ VALUE
 -- 4번 순서 --
 
 
-INSERT INTO BOOKCANCEL (Can_Reason, Can_CurrentDate, Can_Datedif, Can_Refund, Booking_ID, Pol_ID) VALUES 
-('코로나', '2021-06-07', '1', '40000', '11', '1', '5'),
-('코로나', '2021-06-24', '3', '200000', '24', '2', '217');
-
-
-
--- 완성------------
 INSERT INTO BOOKCANCEL (Can_Reason, Can_CurrentDate, Can_Datedif, Can_Refund, Booking_ID, Pol_ID, cust_id)
 (select '코로나', current_date(), datediff(Booking_CheckInDate, current_date()) as dif,
 	booking_totalamount *
 	(select pol_refundRate from cancelpolicy where pol_id = if(dif <= 1, '1', if(dif <= 3, '2', if(dif <= 5, '3', 4)))), 
 		booking.booking_id, pol_id, cust_id from booking, cancelpolicy
 			where pol_id = if(datediff(Booking_CheckInDate, current_date()) <= 1, '1', if(datediff(Booking_CheckInDate, current_date()) <= 3, '2', if(datediff(Booking_CheckInDate, current_date()) <= 5, '3', 4)))
-				and cust_id in (1,45));
--------------------
+				and booking_id 
+                
+                in (1,3));
 
-select * from bookcancel;
+delete from booking where booking_id in (select booking_id from bookcancel);
+			
 
 
 INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
@@ -579,20 +574,22 @@ VALUE
 ('102','1','7','4'),
 ('103','1','9','5');
 
+
+-- test --
 INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
 (select room_id, '0', null, null from room);
+--
 
 -- 5번 순서 --
 
-insert into cardkey(room_id, cust_id) (select room_id, cust_id from roomstate);  
-
-select * from cardkey;
-
 INSERT INTO cardkey(room_id, cust_id)
-(select room_id, '0');
+(select room_id, null
+	from room);
 
-update 
-
+UPDATE cardkey
+INNER JOIN roomstate ON cardkey.room_id = roomstate.room_id 
+    AND roomstate.roomstate_state =1 
+SET cardkey.cust_id=roomstate.cust_id;
 
 -- 6번 순서 --
 
