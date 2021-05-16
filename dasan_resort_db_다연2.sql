@@ -1,3 +1,4 @@
+drop DATABASE dasan_resort;
 CREATE DATABASE dasan_resort;
 use dasan_resort;
 
@@ -25,9 +26,6 @@ CREATE TABLE PAYMENT
     `Pay_Date`                                                                      DATETIME(6)     NOT NULL    COMMENT '지불 날짜 및 시간', 
     `Pay_Type`                                                                      VARCHAR(15)     CHECK (Pay_Type IN ('신용카드','현금','수표','마일리지'))    NOT NULL    COMMENT '지불 수단', 
     `KEY_ID`                                                                        INT             NOT NULL    COMMENT '카드키 ID', 
-    `ResOrder_ID`                                                                   INT             NOT NULL    COMMENT '식당 주문 ID', 
-    `SerReq_ID`                                                                     INT             NOT NULL    COMMENT '서비스 요청 ID', 
-    `FacReq_ID`                                                                     INT             NOT NULL    COMMENT '시설 이용 ID', 
     `Cust_ID`                                                                       INT             NOT NULL    COMMENT '고객 ID', 
     CONSTRAINT  PRIMARY KEY (Pay_ID)
 );
@@ -252,17 +250,17 @@ ALTER TABLE PAYMENT
     ADD CONSTRAINT FK_PAYMENT_KEY_ID_CARDKEY_KEY_ID FOREIGN KEY (KEY_ID)
         REFERENCES CARDKEY (KEY_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE PAYMENT
-    ADD CONSTRAINT FK_PAYMENT_ResOrder_ID_RESTAURANTORDER_ResOrder_ID FOREIGN KEY (ResOrder_ID)
-        REFERENCES RESTAURANTORDER (ResOrder_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+-- bALTER TABLE PAYMENT
+--    ADD CONSTRAINT FK_PAYMENT_ResOrder_ID_RESTAURANTORDER_ResOrder_ID FOREIGN KEY (ResOrder_ID)
+--        REFERENCES RESTAURANTORDER (ResOrder_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE PAYMENT
-    ADD CONSTRAINT FK_PAYMENT_SerReq_ID_SERVICEREQUIREMENT_SerReq_ID FOREIGN KEY (SerReq_ID)
-        REFERENCES SERVICEREQUIREMENT (SerReq_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+-- ALTER TABLE PAYMENT
+--    ADD CONSTRAINT FK_PAYMENT_SerReq_ID_SERVICEREQUIREMENT_SerReq_ID FOREIGN KEY (SerReq_ID)
+--        REFERENCES SERVICEREQUIREMENT (SerReq_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE PAYMENT
-    ADD CONSTRAINT FK_PAYMENT_FacReq_ID_FACILITYREQUIREMENT_FacReq_ID FOREIGN KEY (FacReq_ID)
-        REFERENCES FACILITYREQUIREMENT (FacReq_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+-- ALTER TABLE PAYMENT
+--    ADD CONSTRAINT FK_PAYMENT_FacReq_ID_FACILITYREQUIREMENT_FacReq_ID FOREIGN KEY (FacReq_ID)
+--        REFERENCES FACILITYREQUIREMENT (FacReq_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE PAYMENT
     ADD CONSTRAINT FK_PAYMENT_Cust_ID_CUSTOMER_Cust_ID FOREIGN KEY (Cust_ID)
@@ -584,68 +582,19 @@ VALUE
 INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
 (select room_id, '0', null, null from room);
 
---  여기서부턴 시행착오 --
-
-INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
-(select room.room_id, (select
-		Case 
-			when (current_date() between booking_checkindate and booking_checkoutdate) then '1'
-            else '0'
-		end as case_roomstate),
-		cust_id, booking_id from room, booking
-        where cust_id in (select cust_id from booking)
-        and room_id in (select * from (SELECT room_id FROM room
-        group by room_choice having count(room_choice) 
-        ORDER BY RAND()) as tmp));
-
-select * from roomstate;
-
-
-update roomstate 
-	set roomstate_state = 
-		(Case 
-			when Current_date() between booking_checkindate and booking_checkoutdate then '1'
-			else '0' end )
-		where (select roomstate.room_id from roomstate
-        where cust_id in (select cust_id from booking)
-        and room_id in (select * from (SELECT room_id FROM room
-        ORDER BY RAND()) as tmp));
-        
-        where roomstate.room_id in (select room_id from room order by rand() limit 20);
-
--- 모르겠어요
-
-select * from roomstate;
-
-select * from booking;
-
 -- 5번 순서 --
 
-INSERT INTO CARDKEY(Room_ID, Cust_ID) VALUE
-('11','17'),('106','19'),('15','22'),('43','23'),('58','24'),
-('380', '32'),('33', '34'),('45', '35'),('70', '36'),('220', '39'),
-('31', '20'),('257', '22'),('103', '9'),('104', '19'),('30', '12');
-
-
--- 테스트--
-insert into cardkey(room_id, cust_id) (select room_id, cust_id from roomstate);  ---- 완료
+insert into cardkey(room_id, cust_id) (select room_id, cust_id from roomstate);  
 
 select * from cardkey;
 
--- 6번 순서 --
+INSERT INTO cardkey(room_id, cust_id)
+(select room_id, '0');
 
-INSERT INTO SERVICEREQUIREMENT(Service_ID, SerReq_Count, SerReq_TotalAmount, KEY_ID, Cust_ID) VALUE
-('2','4','12000','KEY_ID','32'),
-('3','4','200000','KEY_ID','32'),
-('4','4','240000','KEY_ID','32'),
-('5','4','160000','KEY_ID','32'),
-('1','2','40000','KEY_ID','34'),
-('1','2','40000','KEY_ID','35'),
-('6','2','140000','KEY_ID','35'),
-('4','2','120000','KEY_ID','36'),
-('2','6','18000','KEY_ID','39'),
-('4','6','360000','KEY_ID','39'),
-('7','6','210000','KEY_ID','39'),('1','1','10000','1','1'),('1','1','10000','2','2'),('1','1','15000','3','5'),('1','1','15000','4','7'),('1','1','15000','5','9');
+update 
+
+
+-- 6번 순서 --
 
 
 INSERT INTO SERVICEREQUIREMENT(Service_ID, SerReq_Count, SerReq_TotalAmount, KEY_ID, Cust_ID)
@@ -657,17 +606,6 @@ INSERT INTO SERVICEREQUIREMENT(Service_ID, SerReq_Count, SerReq_TotalAmount, KEY
 
 
 
-INSERT INTO FACILITYREQUIREMENT (Fac_ID, Fac_Count, FacReq_TotalAmount, KEY_ID, Cust_ID) VALUE ('10','4','40000','KEY_ID','32'),
-('5','2','10000','KEY_ID','34'),
-('7','2','0','KEY_ID','34'),
-('1','2','1000','KEY_ID','35'),
-('6','2','14000','KEY_ID','35'),
-('11','2','16000','KEY_ID','35'),
-('8','2','4000','KEY_ID','36'),
-('3','6','12000','KEY_ID','39'),
-('6','6','42000','KEY_ID','39'),
-('9','6','60000','KEY_ID','39'),('1', '2', '15000', '1', '1'),('2', '3', '30000', '2', '2'),('3', '3', '30000', '3', '5'),('4', '3', '30000', '4', '7'),('5', '2', '12000', '5', '9');
-
 INSERT INTO FACILITYREQUIREMENT (Fac_ID, Fac_Count, FacReq_TotalAmount, KEY_ID, Cust_ID)
 	(select fac_id,
 			(floor(rand() * 5)) as randnum,
@@ -676,22 +614,6 @@ INSERT INTO FACILITYREQUIREMENT (Fac_ID, Fac_Count, FacReq_TotalAmount, KEY_ID, 
 						from facility, cardkey); 
 
 
-
-INSERT INTO RESTAURANTORDER (ResOrder_Menu, ResOrder_Date, ResOrder_TotalAmount, KEY_ID, Res_ID, Cust_ID)
-VALUE ('짜장면', '2021-06-24 19:00:00', '5000', 'KEY_ID', '1', '32'),
-('우동', '2021-06-25 9:00:00', '4000', 'KEY_ID', '2', '32'),
-('바삭한 치킨', '2021-06-24 19:00:00', '20000', 'KEY_ID', '7', '34'),
-('비빔밥', '2021-06-24 20:00:00', '6000', 'KEY_ID', '3', '34'),
-('맥주', '2021-06-24 21:00:00', '4500', 'KEY_ID', '6', '34'),
-('파스타', '2021-06-26 19:00:00', '15000', 'KEY_ID', '4', '35'),
-('짜장면', '2021-06-27 19:00:00', '5000', 'KEY_ID', '1', '36'),
-('칵테일', '2021-06-27 20:00:00', '10000', 'KEY_ID', '5', '36'),
-('우동', '2021-06-27 19:00:00', '4000', 'KEY_ID', '2', '39'),
-('비빔밥', '2021-06-28 10:00:00', '6000', 'KEY_ID', '3', '39'),('비빔밥', '2021-06-16 19:00:00', '6000', '1', '3', '1'),
-('짜장면', '2021-06-16 19:00:00', '5000', '2', '1', '2'),
-('우동', '2021-06-16 19:00:00', '4000', '3', '2', '5'),
-('파스타', '2021-06-17 19:00:00', '15000', '4', '4', '7'),
-('바삭한 치킨', '2021-06-17 19:00:00', '20000', '5', '7', '9');
 
 INSERT INTO RESTAURANTORDER (Res_ID, ResOrder_Menu, ResOrder_count, ResOrder_TotalAmount, KEY_ID, Cust_ID)
 	(select res_id, res_menu,
@@ -704,195 +626,33 @@ select * from restaurantorder;
 
 
 
-
 -- 7번 순서 --
 
-INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, ResOrder_ID, SerReq_ID, FacReq_ID, Cust_ID) VALUE ('36000', '2021-06-05 19:00:00', '카드키', '1', '1', '1', '1', '1'),('231000', '2021-06-21 19:00:00', '신용카드', '1', '1', '1', '1', '20'),
-('361000', '2021-06-21 20:00:00', '신용카드', '2', '2', '2', '2', '22');
-
-INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, ResOrder_ID, SerReq_ID, FacReq_ID, Cust_ID)
-	(SELECT +s2+s3
-FROM
-(select key_id,sum(serreq_totalamount) s1
+INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, CUST_id)
+(select s1+s2+s3, t4.booking_checkoutdate, '신용카드', t1.key_id, t1.cust_id from
+			(select cust_id,key_id,sum(serreq_totalamount) s1
                 from servicerequirement
                     group by key_id) t1
-INNER JOIN 
-            (select key_id,sum(facreq_totalamount) s2
+						INNER JOIN 
+            (select cust_id,key_id,sum(facreq_totalamount) s2
                 from facilityrequirement
                     group by key_id) t2 ON t1.key_id = t2.key_id
-INNER JOIN
-            (select key_id,sum(resorder_totalamount) s3
+						INNER JOIN
+            (select cust_id,key_id,sum(resorder_totalamount) s3
                 from restaurantorder
                     group by key_id) t3 ON t2.key_id = t3.key_id
+						INNER JOIN
+			(select cust_id, booking_checkoutdate,
+					(case when booking_checkoutdate 
+						then 
+						date_add(
+							date_add(
+								date_add(booking_checkoutdate,
+								INTERVAL rand() * 24 hour),
+								INTERVAL rand() * 60 minute),
+								INTERVAL floor(rand() * 60) second)
+							end)
+								from booking) t4 on t1.cust_id = t4.cust_id
                     );
-                    
           
-          
-          
-          SELECT t1.key_id, s1+s2+s3
-FROM
-(select key_id,sum(serreq_totalamount) s1
-                from servicerequirement
-                    group by key_id) t1
-INNER JOIN 
-            (select key_id,sum(facreq_totalamount) s2
-                from facilityrequirement
-                    group by key_id) t2 ON t1.key_id = t2.key_id
-INNER JOIN
-            (select key_id,sum(resorder_totalamount) s3
-                from restaurantorder
-                    group by key_id) t3 ON t2.key_id = t3.key_id;
-          
-          
-          
-(select sum(serreq_totalamount) 
-	from
-		(select key_id, service_id, serreq_totalamount
-		from servicerequirement) s1
-			union
-		(select key_id, fac_id, facreq_totalamount
-		from facilityrequirement) s2
-			union
-		(select key_id, resorder_id, ResOrder_TotalAmount
-		from restaurantorder) s3
-    );
-
-
-
-select * from
-   (select key_id, service_id, serreq_totalamount
-	from servicerequirement) as total 
-    union
-	(select key_id, fac_id, facreq_totalamount
-	from facilityrequirement) 
-    union
-	(select key_id, resorder_id, ResOrder_TotalAmount
-	from restaurantorder); 
-		
-
-
-
- (select key_id, temp1+temp2+temp3
-		from
-			(select sum(serreq_totalamount)
-				from servicerequirement
-					group by key_id) as temp1
-                    union
-			(select sum(facreq_totalamount)
-				from facilityrequirement직관적인거야
-					group by key_id) 
-                    union
-			(select sum(resorder_totalamount)
-				from restaurantorder as temp3
-					group by key_id), key_id
-	);           
-            
-(select sum(serreq_totalamount)
-				from servicerequirement
-					group by key_id);
-                
-                
-(select servicerequirement.key_id, serreq_totalamount, facreq_totalamount
-	from servicerequirement
-	full outer join facilityrequirement
-    on servicerequirement.key_id=facilityrequirement.key_id);
-
-
-		from( 
-			select serreq_totalamount from servicerequirement as temp
-					union
-			select facreq_totalamount from facilityrequirement as temp
-                    union
-			select resorder_totalamount from restaurantorder as temp
-            ) as temp2
-				group by key_id
-		)) as temp3 )));          
-          
-          
-          
-(select * from (
-(select sum(temp2)
-		from( 
-			select serreq_totalamount from servicerequirement as temp
-					union
-			select facreq_totalamount from facilityrequirement as temp
-                    union
-			select resorder_totalamount from restaurantorder as temp
-            ) as temp2
-				group by key_id
-		)) as temp3 )));
-        
-	(select 
-			(select sum(serreq_totalamount)
-				from servicerequirement
-					) +
-			(select sum(facreq_totalamount)
-				from facilityrequirement
-					) +
-			(select sum(resorder_totalamount)
-				from restaurantorder
-					) as temp
-				from cardkey
-					group by key_id
-		);
-
-(select servicerequirement.key_id, 
-	(select sum(serreq_totalamount)
-		from servicerequirement
-			group by servicerequirement.key_id),
-	(select sum(facreq_totalamount)
-		from facilityrequirement
-			group by facilityrequirement.key_id)
-		from servicerequirement
-    inner join facilityrequirement
-    on servicerequirement.key_id=facilityrequirement.key_id);
-
-select (
-(select sum(serreq_totalamount)
-		from servicerequirement
-			group by servicerequirement.key_id)+
-(select sum(facreq_totalamount)
-		from facilityrequirement
-			group by facilityrequirement.key_id));
-
-(select
-	sum(serreq_totalamount), sum(facreq_totalamount)
-    from
-		servicerequirement,
-		facilityrequirement
-        group by servicerequirement.key_id, facilityrequirement.key_id);
-
-select * from servicerequirement
-where key_id = 1;
-
-
-(select
-(select sum(serreq_totalamount)
-		from servicerequirement
-			group by servicerequirement.key_id),
-	(select sum(facreq_totalamount)
-		from facilityrequirement
-			group by facilityrequirement.key_id)
-		from servicerequirement
-    inner join facilityrequirement
-    on servicerequirement.key_id=facilityrequirement.key_id);
-
-(select sum(serreq_totalamount), sum(facreq_totalamount)
-	from (select sum(serreq_totalamount)
-		from servicerequirement
-			group by servicerequirement.key_id) as temp1
-		inner join
-			(select sum(facreq_totalamount)
-		from facilityrequirement
-			group by facilityrequirement.key_id) as temp2
-        on servicerequirement.key_id = facilityrequirement.key_id
-        );
- 
-(select servicerequirement.key_id, sum(serreq_totalamount)
-	from servicerequirement
-		left join facilityrequirement
-	on servicerequirement.key_id=facilityrequirement.key_id
-    group by key_id);
-            
-            
-select * from servicerequirement;
+   
