@@ -82,7 +82,8 @@ CREATE TABLE BOOKING
     `Bed_PlusState`                                                   INT            NOT NULL    COMMENT '침대 추가', 
     `RoomPrice_ID`                                                    INT            NOT NULL    COMMENT '객실가격ID', 
     `Booking_TotalAmount`                                             INT            NOT NULL    DEFAULT 0   COMMENT '예약 총금액[RoomPrice_Amount, Bed_PlusState, PeopleNo]', 
-    `Booking_method`                                                  VARCHAR(15)    CHECK (Booking_method IN ('홈페이지','전화','방문'))    NOT NULL    COMMENT '예약 수단', 
+    `Booking_method`                                                  VARCHAR(15)    CHECK (Booking_method IN ('홈페이지','전화','방문'))    NOT NULL    COMMENT '예약 수단',
+    `shuttle_yesno`											          BOOL 			 NOT NULL    DEFAULT 0  COMMENT '공항 -> 리조트 셔틀 이용여부',
     CONSTRAINT  PRIMARY KEY (Booking_ID)
 );
 
@@ -93,10 +94,9 @@ ALTER TABLE BOOKING COMMENT '예약 테이블';
 CREATE TABLE ROOMPRICE
 (
     `RoomPrice_ID`  INT           NOT NULL    AUTO_INCREMENT COMMENT '객실가격ID', 
-    `Room_Price`    INT           Check (Room_Price IN('200000','300000','400000','500000','600000','700000'))   NOT NULL    COMMENT '객실 가격', 
+    `Room_Price`    INT           NOT NULL    COMMENT '객실 가격', 
     `Room_Week`     BOOL          NOT NULL    DEFAULT 0   COMMENT '객실 - 주중/주말', 
     `Room_Peak`     BOOL          NOT NULL    DEFAULT 0   COMMENT '객실 - 성수기/비성수기', 
-    `Room_ID`       INT           NOT NULL    COMMENT '객실ID', 
     `Room_Type`     VarChar(15)   NOT NULL    COMMENT '객실 타입', 
     CONSTRAINT  PRIMARY KEY (RoomPrice_ID)
 );
@@ -286,9 +286,9 @@ ALTER TABLE BOOKING
     ADD CONSTRAINT FK_BOOKING_RoomPrice_ID_ROOMPRICE_RoomPrice_ID FOREIGN KEY (RoomPrice_ID)
         REFERENCES ROOMPRICE (RoomPrice_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE ROOMPRICE
-    ADD CONSTRAINT FK_ROOMPRICE_Room_ID_ROOM_Room_ID FOREIGN KEY (Room_ID)
-        REFERENCES ROOM (Room_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+-- ALTER TABLE ROOMPRICE
+--    ADD CONSTRAINT FK_ROOMPRICE_Room_ID_ROOM_Room_ID FOREIGN KEY (Room_ID)
+--        REFERENCES ROOM (Room_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE ROOMSTATE
     ADD CONSTRAINT FK_ROOMSTATE_Room_ID_ROOM_Room_ID FOREIGN KEY (Room_ID)
@@ -516,13 +516,25 @@ VALUE
 
 -- 3번 순서 --
 
-INSERT INTO ROOMPRICE (Room_Price, Room_Week, Room_Peak, Room_ID, Room_Type) VALUES 
-('200000', '0', '0', '1', '디럭스룸'),('200000', '1', '0', '2', '디럭스룸'),('200000', '0', '1', '3', '디럭스룸'),('200000', '1', '1', '4', '디럭스룸'),
-('300000', '0', '0', '5', '비즈니스룸'),('300000', '1', '0', '6', '비즈니스룸'),('300000', '0', '1', '7', '비즈니스룸'),('300000', '1', '1', '8', '비즈니스룸'),
-('400000', '0', '0', '9', '수페리어룸'),('400000', '1', '0', '10', '수페리어룸'),('400000', '0', '1', '11', '수페리어룸'),('400000', '1', '1', '12', '수페리어룸'),
-('500000', '0', '0', '13', '디럭스룸 suite'),('500000', '1', '0', '14', '디럭스룸 suite'),('500000', '0', '1', '15', '디럭스룸 suite'),('500000', '1', '1', '16', '디럭스룸 suite'),
-('600000', '0', '0', '17', '비즈니스룸 suite'),('600000', '1', '0', '18', '비즈니스룸 suite'),('600000', '0', '1', '19', '비즈니스룸 suite'),('600000', '1', '1', '20', '비즈니스룸 suite'),
-('700000', '0', '0', '21', '수페리어룸 suite'),('700000', '1', '0', '22', '수페리어룸 suite'),('700000', '0', '1', '23', '수페리어룸 suite'),('700000', '1', '1', '24', '수페리어룸 suite');
+INSERT INTO ROOMPRICE (Room_Price, Room_Week, Room_Peak, Room_Type) VALUES 
+('200000', '0', '0', '디럭스룸'),('200000', '1', '0', '디럭스룸'),('200000', '0', '1', '디럭스룸'),('200000', '1', '1', '디럭스룸'),
+('300000', '0', '0', '비즈니스룸'),('300000', '1', '0', '비즈니스룸'),('300000', '0', '1', '비즈니스룸'),('300000', '1', '1', '비즈니스룸'),
+('400000', '0', '0', '수페리어룸'),('400000', '1', '0', '수페리어룸'),('400000', '0', '1', '수페리어룸'),('400000', '1', '1', '수페리어룸'),
+('500000', '0', '0', '디럭스룸 suite'),('500000', '1', '0', '디럭스룸 suite'),('500000', '0', '1', '디럭스룸 suite'),('500000', '1', '1', '디럭스룸 suite'),
+('600000', '0', '0', '비즈니스룸 suite'),('600000', '1', '0', '비즈니스룸 suite'),('600000', '0', '1', '비즈니스룸 suite'),('600000', '1', '1', '비즈니스룸 suite'),
+('700000', '0', '0', '수페리어룸 suite'),('700000', '1', '0', '수페리어룸 suite'),('700000', '0', '1', '수페리어룸 suite'),('700000', '1', '1', '수페리어룸 suite');
+
+set sql_safe_updates=0;
+
+UPDATE roomprice
+SET roomprice.room_price = roomprice.room_price + 50000
+where room_week = 1;
+
+UPDATE roomprice
+SET roomprice.room_price = roomprice.room_price + 50000
+where room_peak = 1;
+
+select * from roomprice;
 
 
 INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Room_Choice, Bed_PlusState, RoomPrice_ID, Booking_TotalAmount, Booking_method)
@@ -577,6 +589,8 @@ INSERT INTO BOOKCANCEL (Can_Reason, Can_CurrentDate, Can_Datedif, Can_Refund, Bo
 
 delete from booking where booking_id in (select booking_id from bookcancel);
 
+
+
 INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
 VALUE 
 ('11','1','17','9'),
@@ -602,9 +616,17 @@ VALUE
 
 
 -- test --
-INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
-(select room_id, '0', null, null from room);
+-- INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
+-- (select room_id, '0', null, null from room);
 --
+
+UPDATE roomstate
+INNER JOIN roomstate ON cardkey.room_id = roomstate.room_id 
+    AND roomstate.roomstate_state =1 
+SET cardkey.cust_id=roomstate.cust_id;
+
+
+select * from roomstate;
 
 -- 5번 순서 --
 
