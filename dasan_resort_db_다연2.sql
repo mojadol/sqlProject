@@ -631,7 +631,7 @@ INSERT INTO RESTAURANTORDER (Res_ID, ResOrder_Menu, ResOrder_count, ResOrder_Tot
 
 INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, CUST_id)
 (select s1+s2+s3, t4.booking_checkoutdate, 
-'신용카드'
+if(rand() > 0.5, '신용카드', if (rand() > 0.7, '수표', '현금'))
 , t1.key_id, t1.cust_id from
 			(select cust_id,key_id,sum(serreq_totalamount) s1
                 from servicerequirement
@@ -657,3 +657,6 @@ INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, CUST_id)
 							end)
 								from booking) t4 on t1.cust_id = t4.cust_id
                     );
+                    
+                    
+select * from payment;
