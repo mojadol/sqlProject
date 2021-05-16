@@ -568,9 +568,9 @@ VALUE
 ('45','1','35','19'),
 ('70','1','36','20'),
 ('220','1','39','22'),
-('1','1','1','1'),
+('1','1','1','10'),
 ('2','1','2','2'),
-('101','1','5','3'),
+('101','1','5','2'),
 ('102','1','7','4'),
 ('103','1','9','5');
 
@@ -599,7 +599,12 @@ INSERT INTO SERVICEREQUIREMENT(Service_ID, SerReq_Count, SerReq_TotalAmount, KEY
 			(floor(rand() * 5)) as randnum,
 				(select * from (select service_price * randnum) as temp),
 					key_id, cust_id
-						from service, cardkey); 
+						from service, cardkey
+							where not (cust_id is null)); 
+
+select * from cardkey;
+
+select * from servicerequirement;
 
 
 
@@ -608,7 +613,8 @@ INSERT INTO FACILITYREQUIREMENT (Fac_ID, Fac_Count, FacReq_TotalAmount, KEY_ID, 
 			(floor(rand() * 5)) as randnum,
 				(select * from (select fac_price * randnum) as temp),
 					key_id, cust_id
-						from facility, cardkey); 
+						from facility, cardkey
+                        where not (cust_id is null)); 
 
 
 
@@ -617,16 +623,16 @@ INSERT INTO RESTAURANTORDER (Res_ID, ResOrder_Menu, ResOrder_count, ResOrder_Tot
 			(floor(rand() * 5)) as randnum,
 				(select * from (select res_menu_price * randnum) as temp),
 					key_id, cust_id
-						from restaurant, cardkey);
-
-select * from restaurantorder;
-
+						from restaurant, cardkey
+							where not (cust_id is null)); 
 
 
 -- 7번 순서 --
 
 INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, CUST_id)
-(select s1+s2+s3, t4.booking_checkoutdate, '신용카드', t1.key_id, t1.cust_id from
+(select s1+s2+s3, t4.booking_checkoutdate, 
+'신용카드'
+, t1.key_id, t1.cust_id from
 			(select cust_id,key_id,sum(serreq_totalamount) s1
                 from servicerequirement
                     group by key_id) t1
@@ -651,5 +657,3 @@ INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, CUST_id)
 							end)
 								from booking) t4 on t1.cust_id = t4.cust_id
                     );
-          
-   
