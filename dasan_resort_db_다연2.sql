@@ -354,9 +354,9 @@ ALTER TABLE RESTAURANTORDER
 --    ADD CONSTRAINT FK_BOOKING_BOOKING_ID_SHUTTLE_SHUTTLE_ID FOREIGN KEY (Shuttle_ID)
 --        REFERENCES SHUTTLE (Shuttle_ID) ON DELETE CASCADE ON UPDATE CASCADE;
         
-ALTER TABLE BOOKCANCEL
-    ADD CONSTRAINT FK_BOOKCANCEL_Booking_ID_BOOKING_Booking_ID FOREIGN KEY (Booking_ID)
-        REFERENCES BOOKING (Booking_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+-- ALTER TABLE BOOKCANCEL
+--    ADD CONSTRAINT FK_BOOKCANCEL_Booking_ID_BOOKING_Booking_ID FOREIGN KEY (Booking_ID)
+--        REFERENCES BOOKING (Booking_ID) ON DELETE CASCADE ON UPDATE CASCADE;
         
 ALTER TABLE BOOKCANCEL
     ADD CONSTRAINT FK_BOOKCANCEL_Room_ID_ROOMSTATE_cust_ID FOREIGN KEY (cust_ID)
@@ -553,8 +553,6 @@ INSERT INTO BOOKCANCEL (Can_Reason, Can_CurrentDate, Can_Datedif, Can_Refund, Bo
                 in (1,3));
 
 delete from booking where booking_id in (select booking_id from bookcancel);
-			
-
 
 INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
 VALUE 
@@ -601,10 +599,6 @@ INSERT INTO SERVICEREQUIREMENT(Service_ID, SerReq_Count, SerReq_TotalAmount, KEY
 					key_id, cust_id
 						from service, cardkey
 							where not (cust_id is null)); 
-
-select * from cardkey;
-
-select * from servicerequirement;
 
 
 
@@ -660,3 +654,5 @@ if(rand() > 0.5, '신용카드', if (rand() > 0.7, '수표', '현금'))
                     
                     
 select * from payment;
+
+select * from bookcancel;
