@@ -427,7 +427,7 @@ CREATE PROCEDURE loopInsert()
 BEGIN
     DECLARE i INT DEFAULT 201;
         
-    WHILE i <= 300 DO
+    WHILE i <= 250 DO
         INSERT INTO ROOM(`Room_ID`, `Room_Type`, `Room_AvailNo`, `Room_ResState`)
           VALUES(i, '수페리어룸', 2, 0);
         SET i = i + 1;
@@ -442,9 +442,9 @@ DROP PROCEDURE IF EXISTS loopInsert$$
  
 CREATE PROCEDURE loopInsert()
 BEGIN
-    DECLARE i INT DEFAULT 301;
+    DECLARE i INT DEFAULT 251;
         
-    WHILE i <= 367 DO
+    WHILE i <= 350 DO
         INSERT INTO ROOM(`Room_ID`, `Room_Type`, `Room_AvailNo`, `Room_ResState`)
           VALUES(i, '디럭스룸 suite', 2, 0);
         SET i = i + 1;
@@ -459,9 +459,9 @@ DROP PROCEDURE IF EXISTS loopInsert$$
  
 CREATE PROCEDURE loopInsert()
 BEGIN
-    DECLARE i INT DEFAULT 368;
+    DECLARE i INT DEFAULT 351;
         
-    WHILE i <= 434 DO
+    WHILE i <= 450 DO
         INSERT INTO ROOM(`Room_ID`, `Room_Type`, `Room_AvailNo`, `Room_ResState`)
           VALUES(i, '비즈니스룸 suite', 2, 0);
         SET i = i + 1;
@@ -476,7 +476,7 @@ DROP PROCEDURE IF EXISTS loopInsert$$
  
 CREATE PROCEDURE loopInsert()
 BEGIN
-    DECLARE i INT DEFAULT 435;
+    DECLARE i INT DEFAULT 451;
         
     WHILE i <= 500 DO
         INSERT INTO ROOM(`Room_ID`, `Room_Type`, `Room_AvailNo`, `Room_ResState`)
