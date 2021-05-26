@@ -296,11 +296,11 @@ ALTER TABLE ROOMSTATE
 
 ALTER TABLE ROOMSTATE
     ADD CONSTRAINT FK_ROOMSTATE_Cust_ID_CUSTOMER_Cust_ID FOREIGN KEY (Cust_ID)
-        REFERENCES CUSTOMER (Cust_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+        REFERENCES CUSTOMER (Cust_ID) ON DELETE SET NULL ON UPDATE SET NULL;
 
 ALTER TABLE ROOMSTATE
     ADD CONSTRAINT FK_ROOMSTATE_Booking_ID_BOOKING_Booking_ID FOREIGN KEY (Booking_ID)
-        REFERENCES BOOKING (Booking_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+        REFERENCES BOOKING (Booking_ID) ON DELETE SET NULL ON UPDATE SET NULL;
 
 -- ALTER TABLE ROOMSTATE
 --     ADD CONSTRAINT FK_ROOMSTATE_Service_ID_SERVICE_Service_ID FOREIGN KEY (Service_ID)
@@ -928,7 +928,7 @@ INSERT INTO BOOKCANCEL (Can_Reason, Can_CurrentDate, Can_Datedif, Can_Refund, Bo
 delete from booking where booking_id in (select booking_id from bookcancel);
 
 
-
+111111111111111
 INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
 VALUE 
 ('11','1','17','9'),
@@ -972,24 +972,41 @@ VALUE
 
 select cust_id from roomstate;
 
--- test --
--- INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
--- (select room_id, '0', null, null from room);
---
+11111111111
+--------------
 
--- UPDATE roomstate
--- INNER JOIN roomstate ON cardkey.room_id = roomstate.room_id 
---    AND roomstate.roomstate_state =1 
--- SET cardkey.cust_id=roomstate.cust_id;
+ INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID) 
+ (select room_id, '0', null, null from room);
+
+select @bookingid := 5, @roomaloct := 3;
+
+select @Bookingid := (select booking_id from booking where cust_id = 11) , @RoomAloct := 5;
+
+UPDATE roomstate
+SET booking_id = @Bookingid
+where roomstate.room_id = @RoomAloct;
+
+UPDATE roomstate
+INNER JOIN booking ON roomstate.booking_id = booking.booking_id
+SET roomstate.cust_id=booking.cust_id;
+
+UPDATE roomstate
+SET roomstate_state = 1
+where roomstate.cust_id IS NOT NULL ;
 
 
-select * from roomstate;
-select * from cardkey;
+-----------------------------------
 
--- 5번 순서 --
 INSERT INTO cardkey(room_id, cust_id)
-(select room_id, null
+(select null, null
 	from room);
+   
+
+select @keyid := 2;   
+
+UPDATE cardkey
+SET cardkey.room_id = @roomAloct
+where key_id = @keyid;
 
 UPDATE cardkey
 INNER JOIN roomstate ON cardkey.room_id = roomstate.room_id 
@@ -997,6 +1014,8 @@ INNER JOIN roomstate ON cardkey.room_id = roomstate.room_id
 SET cardkey.cust_id=roomstate.cust_id;
 
 -- 6번 순서 --
+
+select * from cardkey;
 
 
 INSERT INTO SERVICEREQUIREMENT(Service_ID, SerReq_Count, SerReq_TotalAmount, KEY_ID, Cust_ID)
@@ -1075,3 +1094,24 @@ if(rand() > 0.5, '신용카드', if (rand() > 0.7, '수표', '현금'))
                     );
   
   
+(select s1, t5.booking_checkoutdate, 
+if(rand() > 0.5, '신용카드', if (rand() > 0.7, '수표', '현금'))
+, t1.key_id, t1.cust_id from
+			(select cust_id,key_id,sum(serreq_totalamount) s1
+                from servicerequirement
+                    group by key_id) t1
+						INNER JOIN                        
+			(select cust_id, booking_checkoutdate,
+					(case when booking_checkoutdate 
+						then 
+						date_add(
+							date_add(
+								date_add(booking_checkoutdate,
+								INTERVAL rand() * 24 hour),
+								INTERVAL rand() * 60 minute),
+								INTERVAL floor(rand() * 60) second)
+							end)
+								from booking) t5 on t1.cust_id = t5.cust_id
+                    );
+  
+select * from payment;
