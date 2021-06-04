@@ -77,13 +77,17 @@ CREATE TABLE BOOKING
     `Booking_CheckInDate`                                             DATE           NOT NULL    COMMENT '예약 체크인 날짜', 
     `Booking_CheckOutDate`                                            DATE           NOT NULL    COMMENT '예약 체크아웃 날짜', 
     `Cust_ID`                                                         INT            NOT NULL    COMMENT '고객ID', 
-    `People_No`                                                       INT            NOT NULL    COMMENT '고객 명수', 
+    `People_No`                                                       INT            NOT NULL    COMMENT '고객 명수',
+    `Booker_name`													  VARCHAR(15)	 NOT NULL    COMMENT '예약자 이름',
+    `Booker_PhoneNumber` VARCHAR(15)	 NOT NULL    COMMENT '예약자 전화번호',
+    `Guest_name` VARCHAR(15)	 NOT NULL    COMMENT '투숙자 이름',
+    `Guest_PhoneNumber` VARCHAR(15)	 NOT NULL    COMMENT '투숙자 전화번호',
     `Room_Choice`                                                     VARCHAR(15)    CHECK (Room_Choice IN('디럭스룸','비즈니스룸','수페리어룸','디럭스룸 suite','비즈니스룸 suite', '수페리어룸 suite'))    NOT NULL    COMMENT '객실 선택', 
+    `Bed_Choice` varchar(15) check(bed_choice in ('킹','더블')) not null comment '침대 선택',
     `Bed_PlusState`                                                   INT            NOT NULL    COMMENT '침대 추가', 
     `RoomPrice_ID`                                                    INT            NOT NULL    COMMENT '객실가격ID', 
-    `Booking_TotalAmount`                                             INT            NOT NULL    DEFAULT 0   COMMENT '예약 총금액[RoomPrice_Amount, Bed_PlusState, PeopleNo]', 
-    `Booking_method`                                                  VARCHAR(15)    CHECK (Booking_method IN ('홈페이지','전화','방문'))    NOT NULL    COMMENT '예약 수단',
     `shuttle_yesno`											          BOOL 			 NOT NULL    DEFAULT 0  COMMENT '공항 -> 리조트 셔틀 이용여부',
+    `booking_totalamount` INT            NULL    COMMENT '총 예약요금',
     CONSTRAINT  PRIMARY KEY (Booking_ID)
 );
 
@@ -211,7 +215,7 @@ CREATE TABLE SHUTTLE
     `Shuttle_Type`                               VarChar(15) CHECK (Shuttle_Type IN ('버스'))    NOT NULL    COMMENT '셔틀 타입', 
    `Shuttle_Depart`                       VarChar(15)   CHECK (Shuttle_Depart IN ('리조트','공항','화성행궁'))    NOT NULL    DEFAULT 0   COMMENT '셔틀 출발지', 
     `Shuttle_Arrive`                                      VarChar(15)   CHECK (Shuttle_Arrive IN ('리조트','공항','화성행궁'))      NOT NULL    COMMENT '셔틀 도착지', 
-    `Shuttle_DepartTime`                                      TIME    CHECK (Shuttle_DepartTime IN ('09:00','10:00','20:00'))    NOT NULL    COMMENT '셔틀 출발시간', 
+    `Shuttle_DepartTime`                                      TIME    CHECK (Shuttle_DepartTime IN ('09:00', '10:00','14:00','20:00'))    NOT NULL    COMMENT '셔틀 출발시간', 
     CONSTRAINT  PRIMARY KEY (Shuttle_ID)
 );
 
@@ -427,7 +431,7 @@ CREATE PROCEDURE loopInsert()
 BEGIN
     DECLARE i INT DEFAULT 201;
         
-    WHILE i <= 250 DO
+    WHILE i <= 300 DO
         INSERT INTO ROOM(`Room_ID`, `Room_Type`, `Room_AvailNo`, `Room_ResState`)
           VALUES(i, '수페리어룸', 2, 0);
         SET i = i + 1;
@@ -442,9 +446,9 @@ DROP PROCEDURE IF EXISTS loopInsert$$
  
 CREATE PROCEDURE loopInsert()
 BEGIN
-    DECLARE i INT DEFAULT 251;
+    DECLARE i INT DEFAULT 301;
         
-    WHILE i <= 350 DO
+    WHILE i <= 400 DO
         INSERT INTO ROOM(`Room_ID`, `Room_Type`, `Room_AvailNo`, `Room_ResState`)
           VALUES(i, '디럭스룸 suite', 2, 0);
         SET i = i + 1;
@@ -459,7 +463,7 @@ DROP PROCEDURE IF EXISTS loopInsert$$
  
 CREATE PROCEDURE loopInsert()
 BEGIN
-    DECLARE i INT DEFAULT 351;
+    DECLARE i INT DEFAULT 401;
         
     WHILE i <= 450 DO
         INSERT INTO ROOM(`Room_ID`, `Room_Type`, `Room_AvailNo`, `Room_ResState`)
@@ -487,6 +491,7 @@ END$$
 DELIMITER ;
 
 CALL loopInsert(); 
+
 
 INSERT INTO CUSTOMER(Cust_webID,Cust_Name,Cust_Contact,Cust_Email,Cust_Address,Cust_Password,Cust_CurrentMile,Cust_Usedmile) 
 Values 
@@ -611,16 +616,16 @@ INSERT INTO FACILITY(Fac_Price,Fac_Type) VALUES
 ('8000', '별보기');
 
 INSERT INTO CANCELPOLICY(Pol_Datedif,Pol_RefundRate) VALUES 
-('1', '0.2'),
-('3', '0.5'),
-('5', '0.7'),
-('7', '1');
+('1', '0.1'),
+('3', '0.4'),
+('4', '0.6'),
+('5', '1');
 
 -- 2번 순서 --
 
 INSERT INTO SHUTTLE (Shuttle_Type, Shuttle_Depart, Shuttle_Arrive, Shuttle_DepartTime) 
 VALUE ('버스', '리조트', '공항', '10:00'),
-('버스', '공항', '리조트', '9:00'),
+('버스', '공항', '리조트', '14:00'),
 ('버스', '리조트', '화성행궁', '10:00'),
 ('버스', '화성행궁', '리조트', '20:00');
 
@@ -733,7 +738,7 @@ CREATE PROCEDURE loopInsert()
 BEGIN
     DECLARE i INT DEFAULT 301;
         
-    WHILE i <= 333 DO
+    WHILE i <= 350 DO
         INSERT INTO BED (Bed_ID, Bed_Type, Bed_State, Room_ID) 
           VALUES(i, '더블', '사용가능', i);
         SET i = i + 1;
@@ -748,9 +753,9 @@ DROP PROCEDURE IF EXISTS loopInsert$$
  
 CREATE PROCEDURE loopInsert()
 BEGIN
-    DECLARE i INT DEFAULT 334;
+    DECLARE i INT DEFAULT 351;
         
-    WHILE i <= 367 DO
+    WHILE i <= 400 DO
         INSERT INTO BED (Bed_ID, Bed_Type, Bed_State, Room_ID) 
           VALUES(i, '킹', '사용가능', i);
         SET i = i + 1;
@@ -765,9 +770,9 @@ DROP PROCEDURE IF EXISTS loopInsert$$
  
 CREATE PROCEDURE loopInsert()
 BEGIN
-    DECLARE i INT DEFAULT 368;
+    DECLARE i INT DEFAULT 401;
         
-    WHILE i <= 401 DO
+    WHILE i <= 425 DO
         INSERT INTO BED (Bed_ID, Bed_Type, Bed_State, Room_ID) 
           VALUES(i, '더블', '사용가능', i);
         SET i = i + 1;
@@ -782,9 +787,9 @@ DROP PROCEDURE IF EXISTS loopInsert$$
  
 CREATE PROCEDURE loopInsert()
 BEGIN
-    DECLARE i INT DEFAULT 402;
+    DECLARE i INT DEFAULT 426;
         
-    WHILE i <= 434 DO
+    WHILE i <= 450 DO
         INSERT INTO BED (Bed_ID, Bed_Type, Bed_State, Room_ID) 
           VALUES(i, '킹', '사용가능', i);
         SET i = i + 1;
@@ -799,9 +804,9 @@ DROP PROCEDURE IF EXISTS loopInsert$$
  
 CREATE PROCEDURE loopInsert()
 BEGIN
-    DECLARE i INT DEFAULT 435;
+    DECLARE i INT DEFAULT 451;
         
-    WHILE i <= 467 DO
+    WHILE i <= 475 DO
         INSERT INTO BED (Bed_ID, Bed_Type, Bed_State, Room_ID) 
           VALUES(i, '더블', '사용가능', i);
         SET i = i + 1;
@@ -816,7 +821,7 @@ DROP PROCEDURE IF EXISTS loopInsert$$
  
 CREATE PROCEDURE loopInsert()
 BEGIN
-    DECLARE i INT DEFAULT 468;
+    DECLARE i INT DEFAULT 476;
         
     WHILE i <= 500 DO
         INSERT INTO BED (Bed_ID, Bed_Type, Bed_State, Room_ID) 
@@ -828,6 +833,35 @@ DELIMITER ;
 
 CALL loopInsert();
 
+
+
+-- 방, 침대 번호 view -----------------------------------------
+
+create view bedroom as
+	select a.*, b.room_type
+	from bed a , room b 
+	where a.room_id = b.room_id;
+    
+select * from bedroom;
+
+-- ---------------------------------------------------------
+
+-- fine 더미데이터 -------------------------------------------------------
+
+INSERT INTO fine (fine_amount, fine_reason, cust_id, key_id)
+select if (r1 = '흡연', '50000','100000'), r1, t2.cust_id, t2.key_id
+	from (select cust_id, key_id 
+				from cardkey
+					group by cust_id) t1
+				inner join 
+		(select cust_id, key_id, if(rand() > 0.5, '흡연', '취사') r1
+			from cardkey
+				group by cust_id) t2 on t1.cust_id = t2.cust_id
+                ;
+                
+-- ----------------------------------------------------------------------
+				
+                
 -- 3번 순서 --
 
 INSERT INTO ROOMPRICE (Room_Price, Room_Week, Room_Peak, Room_Type) VALUES 
@@ -851,136 +885,72 @@ where room_peak = 1;
 select * from roomprice;
 
 
-INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Room_Choice, Bed_PlusState, RoomPrice_ID, Booking_TotalAmount, Booking_method)
-VALUE
-('2021-06-08 12:11:55','2021-06-16', '2021-06-11', '1', '2', '디럭스룸', '0', '1', '200000', '홈페이지'),
-('2021-06-08 13:12:01','2021-06-16', '2021-06-17', '2',  '2', '디럭스룸', '0', '1', '200000', '전화'),
-('2021-06-08 15:52:33','2021-06-16', '2021-06-17', '5',  '4', '비즈니스룸', '0', '5', '320000', '홈페이지'),
-('2021-06-09 07:11:12','2021-06-17', '2021-06-18', '7',  '4', '비즈니스룸', '1', '5', '340000', '홈페이지'),
-('2021-06-08 08:51:23','2021-06-17', '2021-06-18', '9',  '4', '비즈니스룸', '0', '5', '320000', '전화'),
-('2021-06-08 10:33:59','2021-06-17', '2021-06-18', '11',  '2', '디럭스룸', '0', '5', '200000', '홈페이지'),
-('2021-06-09 17:39:07','2021-06-17', '2021-06-18', '12',  '2', '디럭스룸', '0', '5', '200000', '홈페이지'),
-('2021-06-10 13:16:41','2021-06-19', '2021-06-20', '13',  '6', '수페리어룸', '1', '10', '460000', '홈페이지'),
-('2021-06-13 16:43:26','2021-06-19', '2021-06-20', '17',  '2', '디럭스룸', '0', '2', '200000', '방문'),
-('2021-06-14 12:33:15','2021-06-19', '2021-06-20', '19',  '4', '비즈니스룸', '1', '6', '340000', '홈페이지'),
-('2021-06-12 22:15:42','2021-06-20', '2021-06-21', '20',  '2', '디럭스룸', '0', '2', '200000', '홈페이지'),
-('2021-06-14 23:39:53','2021-06-20', '2021-06-21', '22',  '2', '디럭스룸 suite', '0', '14', '500000', '홈페이지'),
-('2021-06-10 03:43:13','2021-06-20', '2021-06-21', '23',  '2', '디럭스룸', '0', '2', '200000', '방문'),
-('2021-06-15 14:05:11','2021-06-20', '2021-06-21', '24',  '6', '수페리어룸', '1', '10', '460000', '방문'),
-('2021-06-15 17:25:40','2021-06-20', '2021-06-21', '27',  '6', '수페리어룸 suite', '2', '21', '760000', '홈페이지'),
-('2021-06-13 05:23:52','2021-06-23', '2021-06-24', '29',  '2', '디럭스룸', '0', '1', '200000', '홈페이지'),
-('2021-06-16 11:32:51','2021-06-24', '2021-06-25', '32',  '4', '비즈니스룸 suite', '1', '5', '340000', '전화'),
-('2021-06-08 13:52:12','2021-06-24', '2021-06-25', '34',  '2', '디럭스룸', '0', '1', '200000', '전화'),
-('2021-06-19 15:36:32','2021-06-26', '2021-06-27', '35',  '2', '디럭스룸', '0', '2', '200000', '전화'),
-('2021-06-20 19:37:41','2021-06-27', '2021-06-28', '36',  '2', '디럭스룸', '0', '2', '200000', '방문'),
-('2021-06-21 06:53:30','2021-06-27', '2021-06-28', '37',  '6', '수페리어룸', '1', '10', '460000', '방문'),
-('2021-06-22 16:33:22','2021-06-27', '2021-06-28', '39',  '6', '수페리어룸', '1', '10', '460000', '홈페이지'),
-('2021-06-20 13:52:41','2021-06-27', '2021-06-28', '42',  '6', '수페리어룸', '1', '10', '460000', '홈페이지'),
-('2021-06-21 12:51:33','2021-05-18', '2021-06-28', '45',  '6', '수페리어룸', '1', '10', '460000', '방문'),
-('2021-06-23 02:12:12','2021-06-28', '2021-06-29', '46',  '2', '디럭스룸', '0', '5', '200000', '홈페이지'),
-('2021-06-13 18:23:21','2021-06-15 ','2021-06-16', '48', '2', '디럭스룸', '0', '6', '200000', '홈페이지'),
-('2021-06-12 15:34:35','2021-06-17', '2021-06-18', '49', '2', '디럭스룸 suite', '0', '14', '500000', '홈페이지'),
-('2021-06-24 12:43:24','2021-06-29', '2021-06-30', '52','6','수페리어룸 suite', '2', '21', '760000', '홈페이지'),
-('2021-06-24 18:25:23','2021-06-29', '2021-06-30', '53', '6', '수페리어룸', '1', '10', '460000', '방문'),
-('2021-06-25 11:43:52','2021-06-30', '2021-07-01', '54', '4', '비즈니스룸', '0', '5', '320000', '홈페이지'),
-('2021-06-25 19:23:23','2021-06-30', '2021-07-01', '56','4', '비즈니스룸', '0', '5', '320000', '홈페이지'),
-('2021-06-25 09:08:12','2021-06-30', '2021-07-01', '59','4', '비즈니스룸', '0', '5', '320000', '홈페이지'),
-('2021-06-10 10:11:30','2021-06-16','2021-06-18','61','1','디럭스룸','0','1','400000','홈페이지'),
-('2021-06-11 11:14:31','2021-06-17','2021-06-18','62','2','디럭스룸 suite','0','14','50000','전화'),
-('2021-06-11 20:15:58','2021-06-22','2021-06-23','63','3','비즈니스룸','1','6','330000','방문'),
-('2021-06-13 09:03:15','2021-06-22','2021-06-24','64','1','수페리어룸 suite','0','22','1400000','홈페이지'),
-('2021-06-14 08:58:39','2021-06-23','2021-06-24','65','5','수페리어룸 suite','1','22','750000','전화'),
-('2021-06-20 21:33:33','2021-06-20','2021-06-21','66','1','디럭스룸 suite','0','15','500000','방문'),
-('2021-06-20 23:29:46','2021-06-25','2021-06-27','67','4','비즈니스룸 suite','1','18','1230000','홈페이지'),
-('2021-06-22 03:45:29','2021-06-27','2021-06-28','68','6','수페리어룸 suite','1','22','760000','홈페이지'),
-('2021-06-08 20:48:12', '2021-06-15', '2021-06-16', '76', '2', '디럭스룸', '0', '1', '200000', '홈페이지'),
-('2021-06-10 15:45:38', '2021-06-15', '2021-06-16', '78', '4', '비즈니스룸', '1', '5', '340000', '홈페이지'), 
-('2021-06-13 23:45:08', '2021-06-15', '2021-06-16', '80', '6', '수페리어룸', '2', '9', '480000', '전화'),
-('2021-06-17 10:56:35', '2021-06-17', '2021-06-18', '81', '2', '비즈니스룸', '0', '5', '300000', '방문'),
-('2021-06-19 18:34:59', '2021-06-22', '2021-06-23', '83', '4', '디럭스룸', '1', '1', '240000', '홈페이지'),
-('2021-06-16 19:38:29', '2021-06-19', '2021-06-20', '85', '2', '수페리어룸', '0', '10', '400000', '홈페이지'),
-('2021-06-23 11:30:30', '2021-06-24', '2021-06-25', '89', '6', '디럭스룸', '2', '1', '280000', '홈페이지'),
-('2021-06-21 21:05:08', '2021-06-23', '2021-06-24', '90', '4', '수페리어룸', '1', '9', '440000', '전화'),
-('2021-07-12 15:20:45', '2021-08-02', '2021-08-04', '91', '5', '디럭스룸', '1', '3', '300000', '홈페이지'),
-('2021-07-13 15:25:45', '2021-08-02', '2021-08-05', '92', '2', '비즈니스룸', '1', '7', '370000', '홈페이지'),
-('2021-07-18 15:49:02', '2021-08-10', '2021-08-12', '93', '4', '디럭스룸 suite', '1', '15', '600000', '홈페이지'),
-('2021-07-18 16:20:30', '2021-08-10', '2021-08-12', '94', '2', '디럭스룸', '0', '3', '250000', '홈페이지'),
-('2021-07-18 16:23:22', '2021-08-10', '2021-08-12', '95', '3', '수페리어룸', '1', '11', '480000', '홈페이지'),
-('2021-07-18 17:33:22', '2021-08-10', '2021-08-13', '96', '2', '수페리어룸 suite', '0', '23', '750000', '홈페이지'),
-('2021-07-18 18:13:22', '2021-08-11', '2021-08-13', '97', '2', '비즈니스룸 suite', '0', '19', '650000', '홈페이지'),
-('2021-07-18 21:23:22', '2021-08-11', '2021-08-15', '98', '3', '디럭스룸', '1', '3', '280000', '전화');
+INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Booker_name, Booker_PhoneNumber,guest_name, guest_PhoneNumber, Room_Choice, bed_choice, Bed_PlusState, RoomPrice_ID, shuttle_yesno)
+VALUEs
+('2021-06-08 12:11:55','2021-06-16', '2021-06-17', '1', '2', '이성규', '010-4906-8347', '이성규', '010-4906-8347', '디럭스룸', '킹',  '0', '1','0'),
+('2021-06-08 13:12:01','2021-06-16', '2021-06-17', '2',  '2', '이상윤', '010-1234-5677', '이상윤', '010-1234-5677', '디럭스룸', '더블', '0', '1','1'),
+('2021-06-08 15:52:33','2021-06-16', '2021-06-17', '3',  '4', '이성우', '010-7894-5612', '이성우', '010-7894-5612', '비즈니스룸', '킹', '0', '5','0'),
+('2021-06-09 07:11:12','2021-06-17', '2021-06-22', '4',  '4', '이리우', '010-1254-7894', '이리우', '010-1254-7894', '비즈니스룸', '더블', '1', '5','0'),
+('2021-06-08 08:51:23','2021-06-17', '2021-06-19', '5',  '4', '라이언', '010-4356-5545', '라이언', '010-4356-5545','비즈니스룸', '더블', '1', '5','1'),
+('2021-06-08 10:33:59','2021-06-17', '2021-06-18', '6',  '2', '비비탄', '010-7894-3652', '비비탄', '010-7894-3652','디럭스룸', '더블', '0', '5','0'),
+('2021-06-09 17:39:07','2021-06-17', '2021-06-20', '7',  '6', '콩콩이', '010-4956-8978', '콩콩이', '010-4956-8978', '디럭스룸', '킹', '1', '5','0');
+
+UPDATE booking
+inner join roomprice on booking.roomprice_id = roomprice.roomprice_id
+SET booking_totalamount = 
+	datediff(booking_checkoutdate, booking_checkindate) * (roomprice.room_price + (bed_plusstate * 20000) + if(people_no > 2, ((people_no - 2) * 10000), 0))
+where booking_totalamount is null;
+
+
+-- 예약 가격 view -----------------------------------------
+create view bookingprice as
+	select a.*,
+		datediff(booking_checkoutdate, booking_checkindate) * (b.room_price + (bed_plusstate * 20000) + if(people_no > 2, ((people_no - 2) * 10000), 0)) as bookingprice
+			from booking a, roomprice b
+            where a.roomprice_id = b.roomprice_id;
+    
+select * from bookingprice;
+-- ---------------------------------------------------------
+
+
 
 -- 4번 순서 --
 
-
 select * from booking;
+select * from bedroom;
 
 INSERT INTO BOOKCANCEL (Can_Reason, Can_CurrentDate, Can_Datedif, Can_Refund, Booking_ID, Pol_ID, cust_id)
 (select '코로나', current_date(), datediff(Booking_CheckInDate, current_date()) as dif,
 	booking_totalamount *
-	(select pol_refundRate from cancelpolicy where pol_id = if(dif <= 1, '1', if(dif <= 3, '2', if(dif <= 5, '3', 4)))), 
+	(select pol_refundRate from cancelpolicy where pol_id = if(dif <= 1, '1', if(dif <= 3, '2', if(dif <= 4, '3', 4)))), 
 		booking.booking_id, pol_id, cust_id from booking, cancelpolicy
-			where pol_id = if(datediff(Booking_CheckInDate, current_date()) <= 1, '1', if(datediff(Booking_CheckInDate, current_date()) <= 3, '2', if(datediff(Booking_CheckInDate, current_date()) <= 5, '3', 4)))
+			where pol_id = if(datediff(Booking_CheckInDate, current_date()) <= 1, '1', if(datediff(Booking_CheckInDate, current_date()) <= 3, '2', if(datediff(Booking_CheckInDate, current_date()) <= 4, '3', 4)))
 				and booking_id 
                 
                 in (1,3));
 
 delete from booking where booking_id in (select booking_id from bookcancel);
 
+select * from booking;
 
-111111111111111
-INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
-VALUE 
-('11','1','17','9'),
-('106','1','19','10'),
-('15','1','22','11'),
-('43','1','23','12'),
-('58','1','24','13'),
-('380','1','32','17'),
-('33','1','34','18'),
-('45','1','35','19'),
-('70','1','36','20'),
-('220','1','39','22'),
-('1','1','11','31'),
-('2','1','2','2'),
-('101','1','12','8'),
-('102','1','7','4'),
-('103','1','9','5'),
-('46', '1','46', '25'),
-('74', '1','48', '26'),
-('34', '1','49', '27'),
-('44', '1','52', '28'),
-('59', '1','53', '29'),
-('3','1','61','33'),
-('305','1','62','34'),
-('114','1','63','35'),
-('495','1','64','36'),
-('500','1','65','37'),
-('304','1','66','38'),
-('410','1','67','39'),
-('487','1','68','40'),
-('108','1','81','44'),
-('54','1','83','45'),
-('230','1','85','46'),
-('78','1','89','47'),
-('203','1','90','48'),
-('65', '1', '91', '49'),
-('67', '1', '94', '52'),
-('88', '1', '98', '56'),
-('285', '1', '95', '53'),
-('107', '1', '92', '50');
+-- INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
+-- VALUE 
+-- ('51','1','1','1'),
+-- ('1','1','2','2'),
+-- ('151','1','3','3'),
+-- ('101','1','4','4'),
+-- ('102','1','5','5'),
+-- ('2','1','6','6'),
+-- ('52','1','7','7');
 
-select cust_id from roomstate;
-
-11111111111
 --------------
 
  INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID) 
  (select room_id, '0', null, null from room);
 
-select @bookingid := 5, @roomaloct := 3;
+select @bookingid := 1, @roomaloct := 51;
 
-select @Bookingid := (select booking_id from booking where cust_id = 11) , @RoomAloct := 5;
+select @Bookingid := (select booking_id from booking where cust_id = 2) , @RoomAloct := 51;
 
 UPDATE roomstate
 SET booking_id = @Bookingid
@@ -993,6 +963,8 @@ SET roomstate.cust_id=booking.cust_id;
 UPDATE roomstate
 SET roomstate_state = 1
 where roomstate.cust_id IS NOT NULL ;
+
+select * from roomstate;
 
 
 -----------------------------------
@@ -1013,10 +985,25 @@ INNER JOIN roomstate ON cardkey.room_id = roomstate.room_id
     AND roomstate.roomstate_state =1 
 SET cardkey.cust_id=roomstate.cust_id;
 
--- 6번 순서 --
-
 select * from cardkey;
 
+-- 6번 순서 --
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- 더미데이터 ----------------------------------------------------------------------------------
 
 INSERT INTO SERVICEREQUIREMENT(Service_ID, SerReq_Count, SerReq_TotalAmount, KEY_ID, Cust_ID)
 	(select service_id,
