@@ -18,7 +18,7 @@ CREATE TABLE CUSTOMER
 
 ALTER TABLE CUSTOMER COMMENT '고객 정보 테이블';
 
--- CUSTOMER Table Create SQL
+# CUSTOMER Table Create SQL
 CREATE TABLE PAYMENT
 (
     `Pay_ID`                                                                        INT             NOT NULL    AUTO_INCREMENT COMMENT '지불 ID', 
@@ -32,7 +32,7 @@ CREATE TABLE PAYMENT
 
 ALTER TABLE PAYMENT COMMENT '지불 테이블';
 
--- CUSTOMER Table Create SQL
+# CUSTOMER Table Create SQL
 CREATE TABLE SERVICE
 (
     `Service_ID`     INT            NOT NULL    AUTO_INCREMENT COMMENT '서비스 ID', 
@@ -43,7 +43,7 @@ CREATE TABLE SERVICE
 
 ALTER TABLE SERVICE COMMENT '서비스 테이블';
 
--- CUSTOMER Table Create SQL
+# CUSTOMER Table Create SQL
 CREATE TABLE SERVICEREQUIREMENT
 (
     `SerReq_ID`                                                         INT        NOT NULL    AUTO_INCREMENT COMMENT '서비스 요청 ID', 
@@ -57,7 +57,7 @@ CREATE TABLE SERVICEREQUIREMENT
 
 ALTER TABLE SERVICEREQUIREMENT COMMENT '고객 서비스 요청 테이블';
 
--- CUSTOMER Table Create SQL
+# CUSTOMER Table Create SQL
 CREATE TABLE BED
 (
     `Bed_ID`         INT            NOT NULL    AUTO_INCREMENT COMMENT '침대 ID', 
@@ -194,7 +194,7 @@ CREATE TABLE RESTAURANT
 ALTER TABLE RESTAURANT COMMENT '식당 테이블';
 
 
--- CUSTOMER Table Create SQL
+# CUSTOMER Table Create SQL
 CREATE TABLE RESTAURANTORDER
 (
     `ResOrder_ID`                                 INT         NOT NULL    AUTO_INCREMENT COMMENT '주문 번호', 
@@ -248,23 +248,23 @@ ALTER TABLE CANCELPOLICY COMMENT '노쇼 정책 테이블';
 
 
 
--- 주석 --
+# 주석 #
 
 ALTER TABLE PAYMENT
     ADD CONSTRAINT FK_PAYMENT_KEY_ID_CARDKEY_KEY_ID FOREIGN KEY (KEY_ID)
         REFERENCES CARDKEY (KEY_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
--- bALTER TABLE PAYMENT
---    ADD CONSTRAINT FK_PAYMENT_ResOrder_ID_RESTAURANTORDER_ResOrder_ID FOREIGN KEY (ResOrder_ID)
---        REFERENCES RESTAURANTORDER (ResOrder_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+# bALTER TABLE PAYMENT
+#    ADD CONSTRAINT FK_PAYMENT_ResOrder_ID_RESTAURANTORDER_ResOrder_ID FOREIGN KEY (ResOrder_ID)
+#        REFERENCES RESTAURANTORDER (ResOrder_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
--- ALTER TABLE PAYMENT
---    ADD CONSTRAINT FK_PAYMENT_SerReq_ID_SERVICEREQUIREMENT_SerReq_ID FOREIGN KEY (SerReq_ID)
---        REFERENCES SERVICEREQUIREMENT (SerReq_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+# ALTER TABLE PAYMENT
+#    ADD CONSTRAINT FK_PAYMENT_SerReq_ID_SERVICEREQUIREMENT_SerReq_ID FOREIGN KEY (SerReq_ID)
+#        REFERENCES SERVICEREQUIREMENT (SerReq_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
--- ALTER TABLE PAYMENT
---    ADD CONSTRAINT FK_PAYMENT_FacReq_ID_FACILITYREQUIREMENT_FacReq_ID FOREIGN KEY (FacReq_ID)
---        REFERENCES FACILITYREQUIREMENT (FacReq_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+# ALTER TABLE PAYMENT
+#    ADD CONSTRAINT FK_PAYMENT_FacReq_ID_FACILITYREQUIREMENT_FacReq_ID FOREIGN KEY (FacReq_ID)
+#        REFERENCES FACILITYREQUIREMENT (FacReq_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE PAYMENT
     ADD CONSTRAINT FK_PAYMENT_Cust_ID_CUSTOMER_Cust_ID FOREIGN KEY (Cust_ID)
@@ -290,9 +290,9 @@ ALTER TABLE BOOKING
     ADD CONSTRAINT FK_BOOKING_RoomPrice_ID_ROOMPRICE_RoomPrice_ID FOREIGN KEY (RoomPrice_ID)
         REFERENCES ROOMPRICE (RoomPrice_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
--- ALTER TABLE ROOMPRICE
---    ADD CONSTRAINT FK_ROOMPRICE_Room_ID_ROOM_Room_ID FOREIGN KEY (Room_ID)
---        REFERENCES ROOM (Room_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+# ALTER TABLE ROOMPRICE
+#    ADD CONSTRAINT FK_ROOMPRICE_Room_ID_ROOM_Room_ID FOREIGN KEY (Room_ID)
+#        REFERENCES ROOM (Room_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE ROOMSTATE
     ADD CONSTRAINT FK_ROOMSTATE_Room_ID_ROOM_Room_ID FOREIGN KEY (Room_ID)
@@ -306,9 +306,9 @@ ALTER TABLE ROOMSTATE
     ADD CONSTRAINT FK_ROOMSTATE_Booking_ID_BOOKING_Booking_ID FOREIGN KEY (Booking_ID)
         REFERENCES BOOKING (Booking_ID) ON DELETE SET NULL ON UPDATE SET NULL;
 
--- ALTER TABLE ROOMSTATE
---     ADD CONSTRAINT FK_ROOMSTATE_Service_ID_SERVICE_Service_ID FOREIGN KEY (Service_ID)
---        REFERENCES SERVICE (Service_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+# ALTER TABLE ROOMSTATE
+#     ADD CONSTRAINT FK_ROOMSTATE_Service_ID_SERVICE_Service_ID FOREIGN KEY (Service_ID)
+#        REFERENCES SERVICE (Service_ID) ON DELETE CASCADE ON UPDATE CASCADE;
         
 ALTER TABLE BED
     ADD CONSTRAINT FK_Bed_ROOM_ID_ROOM_Room_ID FOREIGN KEY (Room_ID)
@@ -354,13 +354,13 @@ ALTER TABLE RESTAURANTORDER
     ADD CONSTRAINT FK_RESTAURANTORDER_Cust_ID_CUSTOMER_Cust_ID FOREIGN KEY (Cust_ID)
         REFERENCES CUSTOMER (Cust_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
--- ALTER TABLE BOOKING
---    ADD CONSTRAINT FK_BOOKING_BOOKING_ID_SHUTTLE_SHUTTLE_ID FOREIGN KEY (Shuttle_ID)
---        REFERENCES SHUTTLE (Shuttle_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+# ALTER TABLE BOOKING
+#    ADD CONSTRAINT FK_BOOKING_BOOKING_ID_SHUTTLE_SHUTTLE_ID FOREIGN KEY (Shuttle_ID)
+#        REFERENCES SHUTTLE (Shuttle_ID) ON DELETE CASCADE ON UPDATE CASCADE;
         
--- ALTER TABLE BOOKCANCEL
---    ADD CONSTRAINT FK_BOOKCANCEL_Booking_ID_BOOKING_Booking_ID FOREIGN KEY (Booking_ID)
---        REFERENCES BOOKING (Booking_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+# ALTER TABLE BOOKCANCEL
+#    ADD CONSTRAINT FK_BOOKCANCEL_Booking_ID_BOOKING_Booking_ID FOREIGN KEY (Booking_ID)
+#        REFERENCES BOOKING (Booking_ID) ON DELETE CASCADE ON UPDATE CASCADE;
         
 ALTER TABLE BOOKCANCEL
     ADD CONSTRAINT FK_BOOKCANCEL_Room_ID_ROOMSTATE_cust_ID FOREIGN KEY (cust_ID)
@@ -370,7 +370,7 @@ ALTER TABLE BOOKCANCEL
     ADD CONSTRAINT FK_BOOKCANCEL_Pol_ID_CANCELPOLICY_Pol_ID FOREIGN KEY (Pol_ID)
         REFERENCES CANCELPOLICY (Pol_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
--- 1번 순서 --
+# 1번 순서 #
 
 INSERT INTO RESTAURANT (Res_Type, Res_Menu, Res_Menu_Price) VALUES 
 ('중식당', '짜장면', '5000'),
@@ -621,7 +621,7 @@ INSERT INTO CANCELPOLICY(Pol_Datedif,Pol_RefundRate) VALUES
 ('4', '0.6'),
 ('5', '1');
 
--- 2번 순서 --
+# 2번 순서 #
 
 INSERT INTO SHUTTLE (Shuttle_Type, Shuttle_Depart, Shuttle_Arrive, Shuttle_DepartTime) 
 VALUE ('버스', '리조트', '공항', '10:00'),
@@ -835,7 +835,7 @@ CALL loopInsert();
 
 
 
--- 방, 침대 번호 view -----------------------------------------
+# 방, 침대 번호 view ####################-
 
 create view bedroom as
 	select a.*, b.room_type
@@ -844,9 +844,9 @@ create view bedroom as
     
 select * from bedroom;
 
--- ---------------------------------------------------------
+# ############################-
 
--- fine 더미데이터 -------------------------------------------------------
+# fine 더미데이터 ###########################-
 
 INSERT INTO fine (fine_amount, fine_reason, cust_id, key_id)
 select if (r1 = '흡연', '50000','100000'), r1, t2.cust_id, t2.key_id
@@ -859,10 +859,10 @@ select if (r1 = '흡연', '50000','100000'), r1, t2.cust_id, t2.key_id
 				group by cust_id) t2 on t1.cust_id = t2.cust_id
                 ;
                 
--- ----------------------------------------------------------------------
+# ###################################
 				
                 
--- 3번 순서 --
+# 3번 순서 #
 
 INSERT INTO ROOMPRICE (Room_Price, Room_Week, Room_Peak, Room_Type) VALUES 
 ('200000', '0', '0', '디럭스룸'),('200000', '1', '0', '디럭스룸'),('200000', '0', '1', '디럭스룸'),('200000', '1', '1', '디럭스룸'),
@@ -902,7 +902,7 @@ SET booking_totalamount =
 where booking_totalamount is null;
 
 
--- 예약 가격 view -----------------------------------------
+# 예약 가격 view ####################-
 create view bookingprice as
 	select a.*,
 		datediff(booking_checkoutdate, booking_checkindate) * (b.room_price + (bed_plusstate * 20000) + if(people_no > 2, ((people_no - 2) * 10000), 0)) as bookingprice
@@ -910,11 +910,11 @@ create view bookingprice as
             where a.roomprice_id = b.roomprice_id;
     
 select * from bookingprice;
--- ---------------------------------------------------------
+# ############################-
 
 
 
--- 4번 순서 --
+# 4번 순서 #
 
 select * from booking;
 select * from bedroom;
@@ -933,17 +933,17 @@ delete from booking where booking_id in (select booking_id from bookcancel);
 
 select * from booking;
 
--- INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
--- VALUE 
--- ('51','1','1','1'),
--- ('1','1','2','2'),
--- ('151','1','3','3'),
--- ('101','1','4','4'),
--- ('102','1','5','5'),
--- ('2','1','6','6'),
--- ('52','1','7','7');
+# INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
+# VALUE 
+# ('51','1','1','1'),
+# ('1','1','2','2'),
+# ('151','1','3','3'),
+# ('101','1','4','4'),
+# ('102','1','5','5'),
+# ('2','1','6','6'),
+# ('52','1','7','7');
 
---------------
+#######
 
  INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID) 
  (select room_id, '0', null, null from room);
@@ -967,7 +967,7 @@ where roomstate.cust_id IS NOT NULL ;
 select * from roomstate;
 
 
------------------------------------
+#################-
 
 INSERT INTO cardkey(room_id, cust_id)
 (select null, null
@@ -987,7 +987,118 @@ SET cardkey.cust_id=roomstate.cust_id;
 
 select * from cardkey;
 
--- 6번 순서 --
+# 6번 순서 #
+
+
+# SERVICEREQUIRENT
+select @key_id := 2; # 카드키 번호
+select @service := '떡 만들기'; # 서비스 유형
+select @num := 3; # 사람 수
+
+insert into servicerequirement(service_id, serreq_count, serreq_totalamount, key_id, cust_id)
+   select service_id,
+    @num,
+    (select * from (select service_price * @num) as pricexnum),
+   @key_id, cust_id 
+      from service, cardkey
+         where key_id = @key_id and service_type = @service;
+            
+select * from servicerequirement;
+
+# FACILITYREQUIREMENT
+select @key_id := 2; # 카드키 번호
+select @facility := '수영장'; # 시설 유형
+select @num := 4; # 사람 수
+
+INSERT INTO FACILITYREQUIREMENT (Fac_ID, Fac_Count, FacReq_TotalAmount, KEY_ID, Cust_ID)
+   select Fac_ID,
+   @num,
+   (select * from (select Fac_Price * @num) as price2xnum),
+   @key_id, Cust_ID
+      from FACILITY, CARDKEY 
+         where KEY_ID = @key_id and Fac_type = @facility;
+   
+            
+select * from FACILITYREQUIREMENT;
+
+
+
+# RESTAURANTORDER
+select @key_id := 2; # 카드키 번호
+select @menu := '파스타'; # 메뉴 유형
+select @num := 2; # 사람 수
+
+INSERT INTO RESTAURANTORDER (Res_ID, ResOrder_Menu, ResOrder_count, ResOrder_TotalAmount, KEY_ID, Cust_ID)
+   select Res_ID,
+    @menu,
+    @num,
+    (select * from (select Res_Menu_Price * @num) as price3xnum),
+    KEY_ID, Cust_ID
+      from RESTAURANT, CARDKEY
+         where KEY_ID = @key_id and Res_Menu = @menu;
+            
+select * from RESTAURANTORDER;
+
+# FINE
+select @key_id := 2; # 카드키 번호
+select @reason := '취사'; # 벌금 유형 
+select @price := '50000'; # 벌금 가격
+select @num := 2; # 횟수
+
+INSERT INTO FINE (Fine_Amount, Fine_Reason, Cust_ID, KEY_ID)
+   select
+    (select * from (select @price * @num) as price4xnum),
+    @reason,
+    Cust_ID, KEY_ID
+      from CARDKEY
+         where KEY_ID = @key_id;
+
+select * from FINE;
+
+
+#PAYMENT
+
+select @paymentmethod := '신용카드';
+
+INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, CUST_id)
+(select s1+s2+s3+s4, t5.booking_checkoutdate, 
+@paymentmethod
+, t1.key_id, t1.cust_id from
+			(select cust_id,key_id,sum(serreq_totalamount) s1
+                from servicerequirement
+                    group by key_id) t1
+						INNER JOIN 
+            (select cust_id,key_id,sum(facreq_totalamount) s2
+                from facilityrequirement
+                    group by key_id) t2 ON t1.key_id = t2.key_id
+						INNER JOIN
+            (select cust_id,key_id,sum(resorder_totalamount) s3
+                from restaurantorder
+                    group by key_id) t3 ON t2.key_id = t3.key_id
+						INNER JOIN
+            (select cust_id,key_id,sum(fine_amount) s4
+                from fine
+                    group by key_id) t4 ON t3.key_id = t4.key_id
+						INNER JOIN                        
+			(select cust_id, booking_checkoutdate,
+					(case when booking_checkoutdate 
+						then 
+						date_add(
+							date_add(
+								date_add(booking_checkoutdate,
+								INTERVAL rand() * 24 hour),
+								INTERVAL rand() * 60 minute),
+								INTERVAL floor(rand() * 60) second)
+							end)
+								from booking) t5 on t1.cust_id = t5.cust_id
+                    );
+
+
+select * from payment;
+
+select * from facilityrequirement;
+
+delete from servicerequirement;
 
 
 
@@ -999,11 +1110,7 @@ select * from cardkey;
 
 
 
-
-
-
-
--- 더미데이터 ----------------------------------------------------------------------------------
+# 더미데이터 #########################################
 
 INSERT INTO SERVICEREQUIREMENT(Service_ID, SerReq_Count, SerReq_TotalAmount, KEY_ID, Cust_ID)
 	(select service_id,
@@ -1045,7 +1152,7 @@ select if (r1 = '흡연', '50000','100000'), r1, t2.cust_id, t2.key_id
                 ;
 
 
--- 7번 순서 --
+# 7번 순서 #
 
 INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, CUST_id)
 (select s1+s2+s3+s4, t5.booking_checkoutdate, 
