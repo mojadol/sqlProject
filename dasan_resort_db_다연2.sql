@@ -85,7 +85,6 @@ CREATE TABLE BOOKING
     `Room_Choice`                                                     VARCHAR(15)    CHECK (Room_Choice IN('디럭스룸','비즈니스룸','수페리어룸','디럭스룸 suite','비즈니스룸 suite', '수페리어룸 suite'))    NOT NULL    COMMENT '객실 선택', 
     `Bed_Choice` varchar(15) check(bed_choice in ('킹','더블')) not null comment '침대 선택',
     `Bed_PlusState`                                                   INT            NOT NULL    COMMENT '침대 추가', 
-    `RoomPrice_ID`                                                    INT            NOT NULL    COMMENT '객실가격ID', 
     `shuttle_yesno`											          BOOL 			 NOT NULL    DEFAULT 0  COMMENT '공항 -> 리조트 셔틀 이용여부',
     `booking_totalamount` INT            NULL    COMMENT '총 예약요금',
     CONSTRAINT  PRIMARY KEY (Booking_ID)
@@ -286,9 +285,9 @@ ALTER TABLE BOOKING
     ADD CONSTRAINT FK_BOOKING_Cust_ID_CUSTOMER_Cust_ID FOREIGN KEY (Cust_ID)
         REFERENCES CUSTOMER (Cust_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE BOOKING
-    ADD CONSTRAINT FK_BOOKING_RoomPrice_ID_ROOMPRICE_RoomPrice_ID FOREIGN KEY (RoomPrice_ID)
-        REFERENCES ROOMPRICE (RoomPrice_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+#ALTER TABLE BOOKING
+#    ADD CONSTRAINT FK_BOOKING_RoomPrice_ID_ROOMPRICE_RoomPrice_ID FOREIGN KEY (RoomPrice_ID)
+#        REFERENCES ROOMPRICE (RoomPrice_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 # ALTER TABLE ROOMPRICE
 #    ADD CONSTRAINT FK_ROOMPRICE_Room_ID_ROOM_Room_ID FOREIGN KEY (Room_ID)
@@ -601,7 +600,6 @@ Values
 ('14qjsWo', '이수호', '010-5100-5959', 'zxcvbnm@gmail.com', '경기도 화성시', 'apeeeple115', 58000, 10000),
 ('moonstar97', '문종현', '010-5200-5759', '0803whdgus@gmail.com', '서울특별시', 'opppapple115', 20000, 0);
 
-
 INSERT INTO FACILITY(Fac_Price,Fac_Type) VALUES 
 ('500', '슈퍼마켓'),
 ('1000', '슈퍼마켓'),
@@ -628,6 +626,8 @@ VALUE ('버스', '리조트', '공항', '10:00'),
 ('버스', '공항', '리조트', '14:00'),
 ('버스', '리조트', '화성행궁', '10:00'),
 ('버스', '화성행궁', '리조트', '20:00');
+
+########################## BED ##############################################################################
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS loopInsert$$
@@ -833,9 +833,10 @@ DELIMITER ;
 
 CALL loopInsert();
 
+##################################################################################################################################
 
 
-# 방, 침대 번호 view ####################-
+########################### 방, 침대 번호 view ####################-
 
 create view bedroom as
 	select a.*, b.room_type
@@ -844,25 +845,12 @@ create view bedroom as
     
 select * from bedroom;
 
-# ############################-
+######################################################-
 
-# fine 더미데이터 ###########################-
 
-INSERT INTO fine (fine_amount, fine_reason, cust_id, key_id)
-select if (r1 = '흡연', '50000','100000'), r1, t2.cust_id, t2.key_id
-	from (select cust_id, key_id 
-				from cardkey
-					group by cust_id) t1
-				inner join 
-		(select cust_id, key_id, if(rand() > 0.5, '흡연', '취사') r1
-			from cardkey
-				group by cust_id) t2 on t1.cust_id = t2.cust_id
-                ;
-                
-# ###################################
-				
-                
 # 3번 순서 #
+
+########################## ROOMPRICE ##############################################################################
 
 INSERT INTO ROOMPRICE (Room_Price, Room_Week, Room_Peak, Room_Type) VALUES 
 ('200000', '0', '0', '디럭스룸'),('200000', '1', '0', '디럭스룸'),('200000', '0', '1', '디럭스룸'),('200000', '1', '1', '디럭스룸'),
@@ -884,40 +872,97 @@ where room_peak = 1;
 
 select * from roomprice;
 
+##################################################################################################################################
 
-INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Booker_name, Booker_PhoneNumber,guest_name, guest_PhoneNumber, Room_Choice, bed_choice, Bed_PlusState, RoomPrice_ID, shuttle_yesno)
+
+
+########### Booking 더미데이터 ##############################################################
+INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Booker_name, Booker_PhoneNumber,guest_name, guest_PhoneNumber, Room_Choice, bed_choice, Bed_PlusState, shuttle_yesno, booking_totalamount)
 VALUEs
-('2021-06-08 12:11:55','2021-06-16', '2021-06-17', '1', '2', '이성규', '010-4906-8347', '이성규', '010-4906-8347', '디럭스룸', '킹',  '0', '1','0'),
-('2021-06-08 13:12:01','2021-06-16', '2021-06-17', '2',  '2', '이상윤', '010-1234-5677', '이상윤', '010-1234-5677', '디럭스룸', '더블', '0', '1','1'),
-('2021-06-08 15:52:33','2021-06-16', '2021-06-17', '3',  '4', '이성우', '010-7894-5612', '이성우', '010-7894-5612', '비즈니스룸', '킹', '0', '5','0'),
-('2021-06-09 07:11:12','2021-06-17', '2021-06-22', '4',  '4', '이리우', '010-1254-7894', '이리우', '010-1254-7894', '비즈니스룸', '더블', '1', '5','0'),
-('2021-06-08 08:51:23','2021-06-17', '2021-06-19', '5',  '4', '라이언', '010-4356-5545', '라이언', '010-4356-5545','비즈니스룸', '더블', '1', '5','1'),
-('2021-06-08 10:33:59','2021-06-17', '2021-06-18', '6',  '2', '비비탄', '010-7894-3652', '비비탄', '010-7894-3652','디럭스룸', '더블', '0', '5','0'),
-('2021-06-09 17:39:07','2021-06-17', '2021-06-20', '7',  '6', '콩콩이', '010-4956-8978', '콩콩이', '010-4956-8978', '디럭스룸', '킹', '1', '5','0');
+('2021-06-08 12:11:55','2021-06-16', '2021-06-17', '1', '2', '이성규', '010-4906-8347', '이성규', '010-4906-8347', '디럭스룸', '킹',  '0', '1','200000'),
+('2021-06-08 13:12:01','2021-06-16', '2021-06-17', '2',  '2', '이상윤', '010-1234-5677', '이상윤', '010-1234-5677', '디럭스룸', '더블', '0', '1','200000'),
+('2021-06-08 15:52:33','2021-06-16', '2021-06-17', '3',  '4', '이성우', '010-7894-5612', '이성우', '010-7894-5612', '비즈니스룸', '킹', '0', '5','200000'),
+('2021-06-09 07:11:12','2021-06-17', '2021-06-22', '4',  '4', '이리우', '010-1254-7894', '이리우', '010-1254-7894', '비즈니스룸', '더블', '1', '5','1100000'),
+('2021-06-08 08:51:23','2021-06-17', '2021-06-19', '5',  '4', '라이언', '010-4356-5545', '라이언', '010-4356-5545','비즈니스룸', '더블', '1', '5','400000'),
+('2021-06-08 10:33:59','2021-06-17', '2021-06-18', '6',  '2', '비비탄', '010-7894-3652', '비비탄', '010-7894-3652','디럭스룸', '더블', '0', '5','200000'),
+('2021-06-09 17:39:07','2021-06-17', '2021-06-20', '7',  '6', '콩콩이', '010-4956-8978', '콩콩이', '010-4956-8978', '디럭스룸', '킹', '1', '5','650000');
 
-UPDATE booking
-inner join roomprice on booking.roomprice_id = roomprice.roomprice_id
-SET booking_totalamount = 
-	datediff(booking_checkoutdate, booking_checkindate) * (roomprice.room_price + (bed_plusstate * 20000) + if(people_no > 2, ((people_no - 2) * 10000), 0))
-where booking_totalamount is null;
+
+
+########################### BOOKING ########################################################################################################
+select @peakstart := '2021-08-01';
+select @peakend := '2021-08-03';
+select @custid := 1;
+select @roomchoice := '디럭스룸';
+select @bedchoice := '더블';
+select @bedplus := 1;
+select @shuttle := 0;
+select @checkindate := '2021-06-16';
+select @checkoutdate := '2021-06-18';
+select @peoplenum := '3';
+select @bookername := '이성규';
+select @bookerphonenumber := '010-4906-8347';
+select @guestname := '이성규';
+select @guestphonenumber := '010-4906-8347';
+
+INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Booker_name, Booker_PhoneNumber,guest_name, guest_PhoneNumber, Room_Choice, bed_choice, Bed_PlusState, shuttle_yesno, booking_totalamount)
+VALUES
+(now(), @checkindate, @checkoutdate, @custid, @peoplenum, @bookername, @bookerphonenumber, @guestname, @guestphonenumber,
+@roomchoice, @bedchoice, @bedplus, @shuttle,
+(select sum(room_price) from(
+select d1, if(dayofweek(d2) in (1,7), 1, 0) as week, if(d3 between @peakstart and @peakend, 1, 0) as peak                    # Add up all room charges.
+from (select * from(
+    select @checkoutdate - INTERVAL (a.a + (10 * b.a) + (100 * c.a) + (1000 * d.a) ) DAY as d1
+    from (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as a              # Get all dates between dates
+    cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as b
+    cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as c
+    cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as d
+) a
+where d1 between @checkindate and DATE_ADD(@checkoutdate, INTERVAL -1 HOUR)
+) as t1
+	inner join
+(select * from(
+    select @checkoutdate - INTERVAL (a.a + (10 * b.a) + (100 * c.a) + (1000 * d.a) ) DAY as d2
+    from (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as a
+    cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as b
+    cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as c
+    cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as d
+) b
+where d2 between @checkindate and DATE_ADD(@checkoutdate, INTERVAL -1 HOUR)) as t2 on t1.d1 = t2.d2
+inner join
+(select * from(
+    select @checkoutdate - INTERVAL (a.a + (10 * b.a) + (100 * c.a) + (1000 * d.a) ) DAY as d3
+    from (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as a
+    cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as b
+    cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as c
+    cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as d
+) c
+where d3 between @checkindate and DATE_ADD(@checkoutdate, INTERVAL -1 HOUR)) as t3 on t1.d1 = t3.d3) as temp # Temporary table before price fetch
+inner join               # Calculation of additional charges for the number of people and extra beds
+(select room_price + (@bedplus * 20000) + if(@peoplenum > 2, ((@peoplenum - 2) * 10000), 0) as room_price, room_week, room_peak, room_type from roomprice where room_type = @roomchoice) as t4 on temp.week = t4.room_week and temp.peak = t4.room_peak));
+    
+select * from booking;
+
+############################################################################################################################################################
 
 
 # 예약 가격 view ####################-
-create view bookingprice as
-	select a.*,
-		datediff(booking_checkoutdate, booking_checkindate) * (b.room_price + (bed_plusstate * 20000) + if(people_no > 2, ((people_no - 2) * 10000), 0)) as bookingprice
-			from booking a, roomprice b
-            where a.roomprice_id = b.roomprice_id;
-    
-select * from bookingprice;
+# create view bookingprice as
+# 	select a.*,
+# 		datediff(booking_checkoutdate, booking_checkindate) * (b.room_price + (bed_plusstate * 20000) + if(people_no > 2, ((people_no - 2) * 10000), 0)) as bookingprice
+#			from booking a, roomprice b
+#            where a.roomprice_id = b.roomprice_id;
+#    
+# select * from bookingprice;
 # ############################-
 
 
 
 # 4번 순서 #
 
-select * from booking;
-select * from bedroom;
+########################## BOOKCANCEL ##########################
+
+select @bookcancel := '1';
 
 INSERT INTO BOOKCANCEL (Can_Reason, Can_CurrentDate, Can_Datedif, Can_Refund, Booking_ID, Pol_ID, cust_id)
 (select '코로나', current_date(), datediff(Booking_CheckInDate, current_date()) as dif,
@@ -926,12 +971,13 @@ INSERT INTO BOOKCANCEL (Can_Reason, Can_CurrentDate, Can_Datedif, Can_Refund, Bo
 		booking.booking_id, pol_id, cust_id from booking, cancelpolicy
 			where pol_id = if(datediff(Booking_CheckInDate, current_date()) <= 1, '1', if(datediff(Booking_CheckInDate, current_date()) <= 3, '2', if(datediff(Booking_CheckInDate, current_date()) <= 4, '3', 4)))
 				and booking_id 
-                
-                in (1,3));
+					in (@bookcancel));
 
 delete from booking where booking_id in (select booking_id from bookcancel);
 
 select * from booking;
+
+##############################################################################
 
 # INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID)
 # VALUE 
@@ -943,7 +989,7 @@ select * from booking;
 # ('2','1','6','6'),
 # ('52','1','7','7');
 
-#######
+########################## ROOMSTATE ####################################################
 
  INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID) 
  (select room_id, '0', null, null from room);
@@ -966,9 +1012,10 @@ where roomstate.cust_id IS NOT NULL ;
 
 select * from roomstate;
 
+########################################################################################################
 
-#################-
 
+########################## CARDKEY ##############################################################################
 INSERT INTO cardkey(room_id, cust_id)
 (select null, null
 	from room);
@@ -987,10 +1034,12 @@ SET cardkey.cust_id=roomstate.cust_id;
 
 select * from cardkey;
 
+##################################################################################################################################
+
 # 6번 순서 #
 
 
-# SERVICEREQUIRENT
+########################### SERVICEREQUIRENT ##############################################################################
 select @key_id := 2; # 카드키 번호
 select @service := '떡 만들기'; # 서비스 유형
 select @num := 3; # 사람 수
@@ -1005,7 +1054,9 @@ insert into servicerequirement(service_id, serreq_count, serreq_totalamount, key
             
 select * from servicerequirement;
 
-# FACILITYREQUIREMENT
+##################################################################################################################################
+
+########################## FACILITYREQUIREMENT ########################################################################################################
 select @key_id := 2; # 카드키 번호
 select @facility := '수영장'; # 시설 유형
 select @num := 4; # 사람 수
@@ -1021,9 +1072,13 @@ INSERT INTO FACILITYREQUIREMENT (Fac_ID, Fac_Count, FacReq_TotalAmount, KEY_ID, 
             
 select * from FACILITYREQUIREMENT;
 
+############################################################################################################################################################
 
 
-# RESTAURANTORDER
+
+111111111111111111111111
+
+########################## RESTAURANTORDER ####################################################
 select @key_id := 2; # 카드키 번호
 select @menu := '파스타'; # 메뉴 유형
 select @num := 2; # 사람 수
@@ -1039,7 +1094,9 @@ INSERT INTO RESTAURANTORDER (Res_ID, ResOrder_Menu, ResOrder_count, ResOrder_Tot
             
 select * from RESTAURANTORDER;
 
-# FINE
+########################################################################################################
+
+########################## FINE ##############################################################################
 select @key_id := 2; # 카드키 번호
 select @reason := '취사'; # 벌금 유형 
 select @price := '50000'; # 벌금 가격
@@ -1055,31 +1112,32 @@ INSERT INTO FINE (Fine_Amount, Fine_Reason, Cust_ID, KEY_ID)
 
 select * from FINE;
 
+########################################################################################################
 
-#PAYMENT
+########################## PAYMENT ####################################################
 
 select @paymentmethod := '신용카드';
 
 INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, CUST_id)
-(select s1+s2+s3+s4, t5.booking_checkoutdate, 
+(select IFNULL(s1, 0)+IFNULL(s2, 0)+IFNULL(s3, 0)+IFNULL(s4, 0), t5.booking_checkoutdate, 
 @paymentmethod
 , t1.key_id, t1.cust_id from
 			(select cust_id,key_id,sum(serreq_totalamount) s1
                 from servicerequirement
                     group by key_id) t1
-						INNER JOIN 
+						left outer JOIN 
             (select cust_id,key_id,sum(facreq_totalamount) s2
                 from facilityrequirement
                     group by key_id) t2 ON t1.key_id = t2.key_id
-						INNER JOIN
+						left outer JOIN
             (select cust_id,key_id,sum(resorder_totalamount) s3
                 from restaurantorder
                     group by key_id) t3 ON t2.key_id = t3.key_id
-						INNER JOIN
+						left outer JOIN
             (select cust_id,key_id,sum(fine_amount) s4
                 from fine
                     group by key_id) t4 ON t3.key_id = t4.key_id
-						INNER JOIN                        
+						left outer JOIN                        
 			(select cust_id, booking_checkoutdate,
 					(case when booking_checkoutdate 
 						then 
@@ -1093,18 +1151,9 @@ INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, CUST_id)
 								from booking) t5 on t1.cust_id = t5.cust_id
                     );
 
-
 select * from payment;
 
-select * from facilityrequirement;
-
-delete from servicerequirement;
-
-
-
-
-
-
+##################################################################################################################################
 
 
 
@@ -1155,25 +1204,25 @@ select if (r1 = '흡연', '50000','100000'), r1, t2.cust_id, t2.key_id
 # 7번 순서 #
 
 INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, CUST_id)
-(select s1+s2+s3+s4, t5.booking_checkoutdate, 
+(select IFNULL(s1, 0)+IFNULL(s2, 0)+IFNULL(s3, 0)+IFNULL(s4, 0), t5.booking_checkoutdate, 
 if(rand() > 0.5, '신용카드', if (rand() > 0.7, '수표', '현금'))
 , t1.key_id, t1.cust_id from
 			(select cust_id,key_id,sum(serreq_totalamount) s1
                 from servicerequirement
                     group by key_id) t1
-						INNER JOIN 
+						left outer JOIN 
             (select cust_id,key_id,sum(facreq_totalamount) s2
                 from facilityrequirement
                     group by key_id) t2 ON t1.key_id = t2.key_id
-						INNER JOIN
+						left outer JOIN
             (select cust_id,key_id,sum(resorder_totalamount) s3
                 from restaurantorder
                     group by key_id) t3 ON t2.key_id = t3.key_id
-						INNER JOIN
+						left outer JOIN
             (select cust_id,key_id,sum(fine_amount) s4
                 from fine
                     group by key_id) t4 ON t3.key_id = t4.key_id
-						INNER JOIN                        
+						left outer JOIN                        
 			(select cust_id, booking_checkoutdate,
 					(case when booking_checkoutdate 
 						then 
@@ -1187,25 +1236,5 @@ if(rand() > 0.5, '신용카드', if (rand() > 0.7, '수표', '현금'))
 								from booking) t5 on t1.cust_id = t5.cust_id
                     );
   
-  
-(select s1, t5.booking_checkoutdate, 
-if(rand() > 0.5, '신용카드', if (rand() > 0.7, '수표', '현금'))
-, t1.key_id, t1.cust_id from
-			(select cust_id,key_id,sum(serreq_totalamount) s1
-                from servicerequirement
-                    group by key_id) t1
-						INNER JOIN                        
-			(select cust_id, booking_checkoutdate,
-					(case when booking_checkoutdate 
-						then 
-						date_add(
-							date_add(
-								date_add(booking_checkoutdate,
-								INTERVAL rand() * 24 hour),
-								INTERVAL rand() * 60 minute),
-								INTERVAL floor(rand() * 60) second)
-							end)
-								from booking) t5 on t1.cust_id = t5.cust_id
-                    );
-  
+
 select * from payment;
