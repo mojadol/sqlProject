@@ -74,7 +74,8 @@ CREATE TABLE BOOKING
     `Booking_ID`                                                      INT            NOT NULL    AUTO_INCREMENT COMMENT '예약ID', 
     `Booking_CurrentDate`                                             DATETIME(6)    NOT NULL    COMMENT '예약 접수 날짜 및 시간',
     `Booking_CheckInDate`                                             DATE           NOT NULL    COMMENT '예약 체크인 날짜', 
-    `Booking_CheckOutDate`                                            DATE           NOT NULL    COMMENT '예약 체크아웃 날짜', 
+    `Booking_CheckOutDate`                                            DATE           NOT NULL    COMMENT '예약 체크아웃 날짜',
+    `room_amount` 													  INT 			 NOT NULL 	 DEFAULT 1 		 COMMENT '선택한 객실 수',
     `Cust_ID`                                                         INT            NOT NULL    COMMENT '고객ID', 
     `People_No`                                                       INT            NOT NULL    COMMENT '고객 명수',
     `Booker_name`													  VARCHAR(15)	 NOT NULL    COMMENT '예약자 이름',
@@ -876,15 +877,15 @@ select * from roomprice;
 
 
 ########### Booking 더미데이터 ##############################################################
-INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Booker_name, Booker_PhoneNumber,guest_name, guest_PhoneNumber, Room_Choice, bed_choice, Bed_PlusState, shuttle_yesno, booking_totalamount)
-VALUEs
-('2021-06-08 12:11:55','2021-06-16', '2021-06-17', '1', '2', '이성규', '010-4906-8347', '이성규', '010-4906-8347', '디럭스룸', '킹',  '0', '1','200000'),
-('2021-06-08 13:12:01','2021-06-16', '2021-06-17', '2',  '2', '이상윤', '010-1234-5677', '이상윤', '010-1234-5677', '디럭스룸', '더블', '0', '1','200000'),
-('2021-06-08 15:52:33','2021-06-16', '2021-06-17', '3',  '4', '이성우', '010-7894-5612', '이성우', '010-7894-5612', '비즈니스룸', '킹', '0', '5','200000'),
-('2021-06-09 07:11:12','2021-06-17', '2021-06-22', '4',  '4', '이리우', '010-1254-7894', '이리우', '010-1254-7894', '비즈니스룸', '더블', '1', '5','1100000'),
-('2021-06-08 08:51:23','2021-06-17', '2021-06-19', '5',  '4', '라이언', '010-4356-5545', '라이언', '010-4356-5545','비즈니스룸', '더블', '1', '5','400000'),
-('2021-06-08 10:33:59','2021-06-17', '2021-06-18', '6',  '2', '비비탄', '010-7894-3652', '비비탄', '010-7894-3652','디럭스룸', '더블', '0', '5','200000'),
-('2021-06-09 17:39:07','2021-06-17', '2021-06-20', '7',  '6', '콩콩이', '010-4956-8978', '콩콩이', '010-4956-8978', '디럭스룸', '킹', '1', '5','650000');
+INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, room_amount, Cust_ID, People_No, Booker_name, Booker_PhoneNumber,guest_name, guest_PhoneNumber, Room_Choice, bed_choice, Bed_PlusState, shuttle_yesno, booking_totalamount)
+VALUES
+('2021-06-08 12:11:55','2021-06-16', '2021-06-17', 1, '1', '2', '이성규', '010-4906-8347', '이성규', '010-4906-8347', '디럭스룸', '킹',  '0', '1','200000'),
+('2021-06-08 13:12:01','2021-06-16', '2021-06-17', 1, '2',  '2', '이상윤', '010-1234-5677', '이상윤', '010-1234-5677', '디럭스룸', '더블', '0', '1','200000'),
+('2021-06-08 15:52:33','2021-06-16', '2021-06-17', 1, '3',  '4', '이성우', '010-7894-5612', '이성우', '010-7894-5612', '비즈니스룸', '킹', '0', '5','200000'),
+('2021-06-09 07:11:12','2021-06-17', '2021-06-22', 1, '4',  '4', '이리우', '010-1254-7894', '이리우', '010-1254-7894', '비즈니스룸', '더블', '1', '5','1100000'),
+('2021-06-08 08:51:23','2021-06-17', '2021-06-19', 1, '5',  '4', '라이언', '010-4356-5545', '라이언', '010-4356-5545','비즈니스룸', '더블', '1', '5','400000'),
+('2021-06-08 10:33:59','2021-06-17', '2021-06-18', 1, '6',  '2', '비비탄', '010-7894-3652', '비비탄', '010-7894-3652','디럭스룸', '더블', '0', '5','200000'),
+('2021-06-09 17:39:07','2021-06-17', '2021-06-20', 1, '7',  '6', '콩콩이', '010-4956-8978', '콩콩이', '010-4956-8978', '디럭스룸', '킹', '1', '5','650000');
 
 
 
@@ -903,10 +904,11 @@ select @bookername := '이성규';
 select @bookerphonenumber := '010-4906-8347';
 select @guestname := '이성규';
 select @guestphonenumber := '010-4906-8347';
+select @roomamount := 2;
 
-INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Booker_name, Booker_PhoneNumber,guest_name, guest_PhoneNumber, Room_Choice, bed_choice, Bed_PlusState, shuttle_yesno, booking_totalamount)
+INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, room_amount, Cust_ID, People_No, Booker_name, Booker_PhoneNumber,guest_name, guest_PhoneNumber, Room_Choice, bed_choice, Bed_PlusState, shuttle_yesno, booking_totalamount)
 VALUES
-(now(), @checkindate, @checkoutdate, @custid, @peoplenum, @bookername, @bookerphonenumber, @guestname, @guestphonenumber,
+(now(), @checkindate, @checkoutdate, @roomamount, @custid, @peoplenum, @bookername, @bookerphonenumber, @guestname, @guestphonenumber,
 @roomchoice, @bedchoice, @bedplus, @shuttle,
 (select sum(room_price) from(
 select d1, if(dayofweek(d2) in (1,7), 1, 0) as week, if(d3 between @peakstart and @peakend, 1, 0) as peak                    # Add up all room charges.
@@ -938,7 +940,7 @@ inner join
 ) c
 where d3 between @checkindate and DATE_ADD(@checkoutdate, INTERVAL -1 HOUR)) as t3 on t1.d1 = t3.d3) as temp # Temporary table before price fetch
 inner join               # Calculation of additional charges for the number of people and extra beds
-(select room_price + (@bedplus * 20000) + if(@peoplenum > 2, ((@peoplenum - 2) * 10000), 0) as room_price, room_week, room_peak, room_type from roomprice where room_type = @roomchoice) as t4 on temp.week = t4.room_week and temp.peak = t4.room_peak));
+(select @roomamount * (room_price + (@bedplus * 20000) + if(@peoplenum > 2, ((@peoplenum - 2) * 10000), 0)) as room_price, room_week, room_peak, room_type from roomprice where room_type = @roomchoice) as t4 on temp.week = t4.room_week and temp.peak = t4.room_peak));
     
 select * from booking;
 
@@ -1075,7 +1077,6 @@ select * from FACILITYREQUIREMENT;
 
 
 
-111111111111111111111111
 
 ########################## RESTAURANTORDER ####################################################
 select @key_id := 2; # 카드키 번호
