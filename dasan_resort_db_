@@ -23,7 +23,7 @@ CREATE TABLE PAYMENT
     `Pay_ID`                                                                        INT             NOT NULL    AUTO_INCREMENT COMMENT '지불 ID', 
     `Pay_TotalAmount`                                                               INT             NOT NULL    DEFAULT 0   COMMENT '지불 총 금액[식당 주문 총 금액 + 서비스 이용 총 금액 + 시설 이용 총 금액]', 
     `Pay_Date`                                                                      DATETIME(6)     NOT NULL    COMMENT '지불 날짜 및 시간', 
-    `Pay_Type`                                                                      VARCHAR(15)     CHECK (Pay_Type IN ('신용카드','현금','수표','마일리지'))    NOT NULL    COMMENT '지불 수단', 
+    `Pay_Type`                                                                      VARCHAR(15)     CHECK (Pay_Type IN ('신용카드','현금','수표','마일리지'))    NULL    COMMENT '지불 수단', 
     `KEY_ID`                                                                        INT             NOT NULL    COMMENT '카드키 ID', 
     `Cust_ID`                                                                       INT             NOT NULL    COMMENT '고객 ID', 
     CONSTRAINT  PRIMARY KEY (Pay_ID)
@@ -225,7 +225,7 @@ CREATE TABLE BOOKCANCEL
     `Can_Reason`                               VarChar(15)     NOT NULL    COMMENT '취소 이유', 
     `Can_Currentdate`                               DATE    NOT NULL    COMMENT '취소 날짜', 
     `Can_Datedif`                       INT         NOT NULL    DEFAULT 0   COMMENT '취소와 날짜차이', 
-    `Can_Refund`                                      INT         NOT NULL    COMMENT '취소 환불총액', 
+    `Can_fee`                                      INT         NOT NULL    COMMENT '취소 환불총액', 
     `Booking_ID`                                      INT        NOT NULL    COMMENT '예약 번호', 
     `Pol_ID`                                     INT        NOT NULL    COMMENT '정책 번호', 
     `Cust_ID`                                     INT        NOT NULL    COMMENT '고객ID',
@@ -619,6 +619,7 @@ INSERT INTO CANCELPOLICY(Pol_Datedif,Pol_RefundRate) VALUES
 ('4', '0.6'),
 ('5', '1');
 
+
 # 2번 순서 #
 
 INSERT INTO SHUTTLE (Shuttle_Type, Shuttle_Depart, Shuttle_Arrive, Shuttle_DepartTime) 
@@ -881,13 +882,14 @@ INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDa
 VALUEs
 ('2021-06-08 12:11:55','2021-06-16', '2021-06-17', '1', '2', '이성규', '010-4906-8347', '이성규', '010-4906-8347', '디럭스룸', '킹',  '0', '1','200000'),
 ('2021-06-08 13:12:01','2021-06-16', '2021-06-17', '2',  '2', '이상윤', '010-1234-5677', '이상윤', '010-1234-5677', '디럭스룸', '더블', '0', '1','200000'),
-('2021-06-08 15:52:33','2021-06-16', '2021-06-17', '3',  '4', '이성우', '010-7894-5612', '이성우', '010-7894-5612', '비즈니스룸', '킹', '0', '5','200000'),
-('2021-06-09 07:11:12','2021-06-17', '2021-06-22', '4',  '4', '이리우', '010-1254-7894', '이리우', '010-1254-7894', '비즈니스룸', '더블', '1', '5','1100000'),
-('2021-06-08 08:51:23','2021-06-17', '2021-06-19', '5',  '4', '라이언', '010-4356-5545', '라이언', '010-4356-5545','비즈니스룸', '더블', '1', '5','400000'),
-('2021-06-08 10:33:59','2021-06-17', '2021-06-18', '6',  '2', '비비탄', '010-7894-3652', '비비탄', '010-7894-3652','디럭스룸', '더블', '0', '5','200000'),
-('2021-06-09 17:39:07','2021-06-17', '2021-06-20', '7',  '6', '콩콩이', '010-4956-8978', '콩콩이', '010-4956-8978', '디럭스룸', '킹', '1', '5','650000'),
+('2021-06-08 15:52:33','2021-06-16', '2021-06-17', '3',  '4', '이성우', '010-7894-5612', '이성우', '010-7894-5612', '비즈니스룸', '킹', '0', '0','200000'),
+('2021-06-09 07:11:12','2021-06-17', '2021-06-22', '4',  '4', '이리우', '010-1254-7894', '이리우', '010-1254-7894', '비즈니스룸', '더블', '1', '1','1100000'),
+('2021-06-08 08:51:23','2021-06-17', '2021-06-19', '5',  '4', '라이언', '010-4356-5545', '라이언', '010-4356-5545','비즈니스룸', '더블', '1', '0','400000'),
+('2021-06-08 10:33:59','2021-06-17', '2021-06-18', '6',  '2', '비비탄', '010-7894-3652', '비비탄', '010-7894-3652','디럭스룸', '더블', '0', '0','200000'),
+('2021-06-09 17:39:07','2021-06-17', '2021-06-20', '7',  '6', '콩콩이', '010-4956-8978', '콩콩이', '010-4956-8978', '디럭스룸', '킹', '1', '0','650000'),
 ('2021-05-28 12:11:55','2021-05-29', '2021-05-30', '1', '2', '이성규', '010-4906-8347', '이성규', '010-4906-8347', '디럭스룸', '킹',  '0', '1','200000');
 
+select * from bookinglog;
 
 
 select * from booking;
@@ -973,21 +975,22 @@ select @peakend := '2021-08-03';
 ##################
 
 # customer input
-select @custid := 1;
-select @roomchoice := '비즈니스룸';
+select @custid := 8;
+select @roomchoice := '수페리어룸 suite';
 select @bedchoice := '더블';
 select @bedplus := 0;
 select @shuttle := 0;
-select @checkindate := '2021-06-04';
-select @checkoutdate := '2021-06-06';
+select @checkindate := '2021-06-07';
+select @checkoutdate := '2021-06-09';
 select @peoplenum := '2';
-select @bookername := '이성규';
-select @bookerphonenumber := '010-4906-8347';
-select @guestname := '이성규';
-select @guestphonenumber := '010-4906-8347';
+select @bookername := '아이유';
+select @bookerphonenumber := '010-1234-5617';
+select @guestname := '아이유';
+select @guestphonenumber := '010-1234-5617';
 ###################
 
 
+select * from booking;
 
 
 INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Booker_name, Booker_PhoneNumber,guest_name, guest_PhoneNumber, Room_Choice, bed_choice, Bed_PlusState, shuttle_yesno, booking_totalamount)
@@ -1033,6 +1036,8 @@ select @bookingid := (select booking_id from booking where booker_name = '아이
 delete from booking where booking_id = @bookingid;
 
 
+
+
 ############################################################################################################################################################
 
 
@@ -1051,21 +1056,23 @@ delete from booking where booking_id = @bookingid;
 # 4번 순서 #
 
 ########################## BOOKCANCEL ##########################
+select @bookcancel := '26';
+select @cancelreason := '코로나';
 
-select @bookcancel := '1';
-
-INSERT INTO BOOKCANCEL (Can_Reason, Can_CurrentDate, Can_Datedif, Can_Refund, Booking_ID, Pol_ID, cust_id)
-(select '코로나', current_date(), datediff(Booking_CheckInDate, current_date()) as dif,
-	booking_totalamount *
-	(select pol_refundRate from cancelpolicy where pol_id = if(dif <= 1, '1', if(dif <= 3, '2', if(dif <= 4, '3', 4)))), 
+INSERT INTO BOOKCANCEL (Can_Reason, Can_CurrentDate, Can_Datedif, Can_fee, Booking_ID, Pol_ID, cust_id)
+(select @cancelreason, current_date(), datediff(Booking_CheckInDate, current_date()) as dif,
+	booking_totalamount * (1-
+	(select pol_refundRate from cancelpolicy where pol_id = if(dif <= 1, '1', if(dif <= 3, '2', if(dif <= 4, '3', 4))))), 
 		booking.booking_id, pol_id, cust_id from booking, cancelpolicy
-			where pol_id = if(datediff(Booking_CheckInDate, current_date()) <= 1, '1', if(datediff(Booking_CheckInDate, current_date()) <= 3, '2', if(datediff(Booking_CheckInDate, current_date()) <= 4, '3', 4)))
+			where pol_id = if(datediff(Booking_CheckInDate, current_date()) <= 1, '1', if(datediff(Booking_CheckInDate, current_date()) <= 3, '2',
+            if(datediff(Booking_CheckInDate, current_date()) <= 4, '3', 4)))
 				and booking_id 
 					in (@bookcancel));
 
 delete from booking where booking_id in (select booking_id from bookcancel);
 
-select * from booking;
+
+select * from bookcancel;
 
 ##############################################################################
 
@@ -1267,48 +1274,108 @@ select * from FINE;
 
 ########################## PAYMENT ####################################################
 
-select @paytype := '신용카드';
 
-INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, CUST_id)
-(select IFNULL(s1, 0)+IFNULL(s2, 0)+IFNULL(s3, 0)+IFNULL(s4, 0), current_timestamp(), 
-@paytype
-, t1.key_id, t1.cust_id from
-			(select cust_id,key_id,sum(serreq_totalamount) s1
-                from servicerequirement
-                    group by key_id) t1
-						left outer JOIN 
-            (select cust_id,key_id,sum(facreq_totalamount) s2
-                from facilityrequirement
-                    group by key_id) t2 ON t1.key_id = t2.key_id
-						left outer JOIN
-            (select cust_id,key_id,sum(resorder_totalamount) s3
-                from restaurantorder
-                    group by key_id) t3 ON t2.key_id = t3.key_id
-						left outer JOIN
-            (select cust_id,key_id,sum(fine_amount) s4
-                from fine
-                    group by key_id) t4 ON t3.key_id = t4.key_id
-                    );
+CREATE TABLE PAYMENTlog
+(
+	`paylog_id`				  			   					     INT			auto_increment,
+    `Pay_ID`                                                     INT             NOT NULL,  
+	`Cust_ID`                                                    INT             NOT NULL , 
+    `time_stamp`                                                 timestamp     NOT NULL  ,
+    `payamount`                                                  VARCHAR(15)         not NULL,    
+    `pay_type`                                                   varchar(15)             NULL   CHECK (Pay_Type IN ('신용카드','현금','수표','마일리지')),
+    `log`          		                                         varchar(15)             NOT NULL  ,
+    CONSTRAINT  PRIMARY KEY (Paylog_ID)
+);
 
-select * from
-(select cust_id,key_id,sum(serreq_totalamount) s1
-                from servicerequirement
-                    group by key_id) t1
-						left outer JOIN 
-            (select cust_id,key_id,sum(facreq_totalamount) s2
-                from facilityrequirement
-                    group by key_id) t2 ON t1.key_id = t2.key_id
-						;
 
-            (select cust_id,key_id,sum(facreq_totalamount) s2
-                from facilityrequirement
-                    group by key_id) ;
+
+############## payment update TRIGGER
+delimiter $$ 
+   create trigger payment_trigger
+    after update on PAYMENT
+    for each row
+    begin
+	  declare pay_id int;
+	  declare cust_id int;
+      declare time_stamp timestamp;
+      declare payamount int;
+      declare pay_type varchar(15);
+      declare log varchar(1);
+      
+      set pay_id = old.pay_id;
+	  set cust_id = old.cust_id;
+	  set time_stamp = current_timestamp();
+      set payamount = @payamount;
+      set pay_type = @paytype;
+      set loG = 'C';
+      
+      insert into paymentlog(pay_id,cust_id,time_stamp,payamount,pay_type,log) 
+		value (pay_id,cust_id,time_stamp,payamount,pay_type,log) ;
+   end $$
+delimiter ;
+
+
+
+select @keyid := '101';
+
+INSERT INTO PAYMENT (KEY_ID, CUST_id, Pay_TotalAmount, Pay_Date, Pay_Type)    
+    (select t1.key_id, t1.cust_id,
+           sum(serreq_totalamount + facreq_totalamount + resorder_totalamount + fine_amount),
+           current_timestamp(), 
+           null
+    from 
+    (select cust_id, key_id
+		from cardkey where cust_id is not null
+			group by key_id) t1
+					inner join
+    ((select cust_id, key_id, serreq_totalamount, 0 as facreq_totalamount, 0 as resorder_totalamount, 0 as fine_amount
+           from servicerequirement
+          ) union all
+          (select cust_id, key_id, 0 as serreq_totalamount, facreq_totalamount, 0 as resorder_totalamount, 0 as fine_amount
+           from facilityrequirement
+          ) union all
+          (select cust_id, key_id, 0 as serreq_totalamount, 0 as facreq_totalamount, resorder_totalamount, 0 as fine_amount
+           from restaurantorder
+          ) union all
+          (select cust_id, key_id, 0 as serreq_totalamount, 0 as facreq_totalamount, 0 as resorder_totalamount, fine_amount
+           from fine
+          )
+         ) t2 on t1.key_id = t2.key_id
+         where t1.key_id = @keyid
+    group by cust_id, key_id);
+
 
 select * from payment;
 
+select @paytype := '신용카드'; 
+select @payamount := '22000';
+select @payid := '1';
+
+update payment 
+set pay_type = @paytype, pay_totalamount = pay_totalamount - @payamount
+where pay_id = @payid;
+
+select * from paymentlog;
+select * from bookinglog;
+
+select @bookingid := '13' ;
+select *
+	from(
+		(select * from paymentlog) t1
+			inner join
+		(select * from bookinglog where booking_id = @bookingid) t2 on t1.cust_id = t2.cust_id);
+
+        
 
 
 ##################################################################################################################################
+
+
+
+
+
+
+
 
 
 
@@ -1393,3 +1460,4 @@ if(rand() > 0.5, '신용카드', if (rand() > 0.7, '수표', '현금'))
   
 
 select * from payment;
+

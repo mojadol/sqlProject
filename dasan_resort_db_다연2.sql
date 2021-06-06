@@ -8,9 +8,9 @@ CREATE TABLE CUSTOMER
     `Cust_Name`                                   VARCHAR(15)    NOT NULL    COMMENT '고객 이름', 
     `Cust_Contact`                                VARCHAR(15)            NOT NULL    COMMENT '고객 연락처', 
     `Cust_Email`                                  VARCHAR(30)    NOT NULL    COMMENT '고객 이메일', 
-    `Cust_Address`                                VARCHAR(50)    NOT NULL    COMMENT '고객 주소', 
     `Cust_Password`                               varchar(15)            NOT NULL    COMMENT '고객 비밀번호', 
-    `Cust_CurrentMile`                            INT            NOT NULL    DEFAULT 0   COMMENT '고객 현재 마일리지[지불금액*0.01-기사용 마일리지]', 
+	`Cust_Address`                                VARCHAR(50)    NOT NULL    COMMENT '고객 주소', 
+	`Cust_CurrentMile`                            INT            NOT NULL    DEFAULT 0   COMMENT '고객 현재 마일리지[지불금액*0.01-기사용 마일리지]', 
     `Cust_Usedmile`                               INT            NOT NULL    DEFAULT 0   COMMENT '고객 기사용 마일리지', 
     CONSTRAINT  PRIMARY KEY (Cust_ID)
 );
@@ -23,7 +23,7 @@ CREATE TABLE PAYMENT
     `Pay_ID`                                                                        INT             NOT NULL    AUTO_INCREMENT COMMENT '지불 ID', 
     `Pay_TotalAmount`                                                               INT             NOT NULL    DEFAULT 0   COMMENT '지불 총 금액[식당 주문 총 금액 + 서비스 이용 총 금액 + 시설 이용 총 금액]', 
     `Pay_Date`                                                                      DATETIME(6)     NOT NULL    COMMENT '지불 날짜 및 시간', 
-    `Pay_Type`                                                                      VARCHAR(15)     CHECK (Pay_Type IN ('신용카드','현금','수표','마일리지'))    NOT NULL    COMMENT '지불 수단', 
+    `Pay_Type`                                                                      VARCHAR(15)     CHECK (Pay_Type IN ('신용카드','현금','수표','마일리지'))    NULL    COMMENT '지불 수단', 
     `KEY_ID`                                                                        INT             NOT NULL    COMMENT '카드키 ID', 
     `Cust_ID`                                                                       INT             NOT NULL    COMMENT '고객 ID', 
     CONSTRAINT  PRIMARY KEY (Pay_ID)
@@ -74,8 +74,7 @@ CREATE TABLE BOOKING
     `Booking_ID`                                                      INT            NOT NULL    AUTO_INCREMENT COMMENT '예약ID', 
     `Booking_CurrentDate`                                             DATETIME(6)    NOT NULL    COMMENT '예약 접수 날짜 및 시간',
     `Booking_CheckInDate`                                             DATE           NOT NULL    COMMENT '예약 체크인 날짜', 
-    `Booking_CheckOutDate`                                            DATE           NOT NULL    COMMENT '예약 체크아웃 날짜',
-    `room_amount` 													  INT 			 NOT NULL 	 DEFAULT 1 		 COMMENT '선택한 객실 수',
+    `Booking_CheckOutDate`                                            DATE           NOT NULL    COMMENT '예약 체크아웃 날짜', 
     `Cust_ID`                                                         INT            NOT NULL    COMMENT '고객ID', 
     `People_No`                                                       INT            NOT NULL    COMMENT '고객 명수',
     `Booker_name`													  VARCHAR(15)	 NOT NULL    COMMENT '예약자 이름',
@@ -226,7 +225,7 @@ CREATE TABLE BOOKCANCEL
     `Can_Reason`                               VarChar(15)     NOT NULL    COMMENT '취소 이유', 
     `Can_Currentdate`                               DATE    NOT NULL    COMMENT '취소 날짜', 
     `Can_Datedif`                       INT         NOT NULL    DEFAULT 0   COMMENT '취소와 날짜차이', 
-    `Can_Refund`                                      INT         NOT NULL    COMMENT '취소 환불총액', 
+    `Can_fee`                                      INT         NOT NULL    COMMENT '취소 환불총액', 
     `Booking_ID`                                      INT        NOT NULL    COMMENT '예약 번호', 
     `Pol_ID`                                     INT        NOT NULL    COMMENT '정책 번호', 
     `Cust_ID`                                     INT        NOT NULL    COMMENT '고객ID',
@@ -492,7 +491,8 @@ DELIMITER ;
 CALL loopInsert(); 
 
 
-INSERT INTO CUSTOMER(Cust_Name,Cust_Contact,Cust_Email,Cust_Address,Cust_Password,Cust_CurrentMile,Cust_Usedmile) 
+
+INSERT INTO CUSTOMER(Cust_Name,Cust_Contact,Cust_Email,Cust_Password,Cust_Address,Cust_CurrentMile,Cust_Usedmile) 
 Values 
 ('이성규','010-4906-8347','loveleemoon@naver.com','경기도 화성시','sg1234',3000,0),
 ('이상윤','010-1234-5677','lldn@naver.com','경기도 수원시','sk7895',5000,5000),
@@ -618,6 +618,7 @@ INSERT INTO CANCELPOLICY(Pol_Datedif,Pol_RefundRate) VALUES
 ('3', '0.4'),
 ('4', '0.6'),
 ('5', '1');
+
 
 # 2번 순서 #
 
@@ -809,7 +810,7 @@ BEGIN
     WHILE i <= 475 DO
         INSERT INTO BED (Bed_ID, Bed_Type, Bed_State, Room_ID) 
           VALUES(i, '더블', '사용가능', i);
-        SET i = i + 1;
+        SET i = i + 1; 
     END WHILE;
 END$$
 DELIMITER ;
@@ -877,38 +878,124 @@ select * from roomprice;
 
 
 ########### Booking 더미데이터 ##############################################################
-INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, room_amount, Cust_ID, People_No, Booker_name, Booker_PhoneNumber,guest_name, guest_PhoneNumber, Room_Choice, bed_choice, Bed_PlusState, shuttle_yesno, booking_totalamount)
-VALUES
-('2021-06-08 12:11:55','2021-06-16', '2021-06-17', 1, '1', '2', '이성규', '010-4906-8347', '이성규', '010-4906-8347', '디럭스룸', '킹',  '0', '1','200000'),
-('2021-06-08 13:12:01','2021-06-16', '2021-06-17', 1, '2',  '2', '이상윤', '010-1234-5677', '이상윤', '010-1234-5677', '디럭스룸', '더블', '0', '1','200000'),
-('2021-06-08 15:52:33','2021-06-16', '2021-06-17', 1, '3',  '4', '이성우', '010-7894-5612', '이성우', '010-7894-5612', '비즈니스룸', '킹', '0', '5','200000'),
-('2021-06-09 07:11:12','2021-06-17', '2021-06-22', 1, '4',  '4', '이리우', '010-1254-7894', '이리우', '010-1254-7894', '비즈니스룸', '더블', '1', '5','1100000'),
-('2021-06-08 08:51:23','2021-06-17', '2021-06-19', 1, '5',  '4', '라이언', '010-4356-5545', '라이언', '010-4356-5545','비즈니스룸', '더블', '1', '5','400000'),
-('2021-06-08 10:33:59','2021-06-17', '2021-06-18', 1, '6',  '2', '비비탄', '010-7894-3652', '비비탄', '010-7894-3652','디럭스룸', '더블', '0', '5','200000'),
-('2021-06-09 17:39:07','2021-06-17', '2021-06-20', 1, '7',  '6', '콩콩이', '010-4956-8978', '콩콩이', '010-4956-8978', '디럭스룸', '킹', '1', '5','650000');
+INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Booker_name, Booker_PhoneNumber,guest_name, guest_PhoneNumber, Room_Choice, bed_choice, Bed_PlusState, shuttle_yesno, booking_totalamount)
+VALUEs
+('2021-06-08 12:11:55','2021-06-16', '2021-06-17', '1', '2', '이성규', '010-4906-8347', '이성규', '010-4906-8347', '디럭스룸', '킹',  '0', '1','200000'),
+('2021-06-08 13:12:01','2021-06-16', '2021-06-17', '2',  '2', '이상윤', '010-1234-5677', '이상윤', '010-1234-5677', '디럭스룸', '더블', '0', '1','200000'),
+('2021-06-08 15:52:33','2021-06-16', '2021-06-17', '3',  '4', '이성우', '010-7894-5612', '이성우', '010-7894-5612', '비즈니스룸', '킹', '0', '0','200000'),
+('2021-06-09 07:11:12','2021-06-17', '2021-06-22', '4',  '4', '이리우', '010-1254-7894', '이리우', '010-1254-7894', '비즈니스룸', '더블', '1', '1','1100000'),
+('2021-06-08 08:51:23','2021-06-17', '2021-06-19', '5',  '4', '라이언', '010-4356-5545', '라이언', '010-4356-5545','비즈니스룸', '더블', '1', '0','400000'),
+('2021-06-08 10:33:59','2021-06-17', '2021-06-18', '6',  '2', '비비탄', '010-7894-3652', '비비탄', '010-7894-3652','디럭스룸', '더블', '0', '0','200000'),
+('2021-06-09 17:39:07','2021-06-17', '2021-06-20', '7',  '6', '콩콩이', '010-4956-8978', '콩콩이', '010-4956-8978', '디럭스룸', '킹', '1', '0','650000'),
+('2021-05-28 12:11:55','2021-05-29', '2021-05-30', '1', '2', '이성규', '010-4906-8347', '이성규', '010-4906-8347', '디럭스룸', '킹',  '0', '1','200000');
+
+select * from bookinglog;
+
+
+select * from booking;
+
+select @monthsearch := 6; # 조회하려는 달 선택
+select * from booking where month(booking_checkindate) = @monthsearch ; 
 
 
 
 ########################### BOOKING ########################################################################################################
+
+CREATE TABLE Bookinglog #########ROOMSTATE LOG TABLE 
+(
+    `Bookinglog_ID`          INT       NOT NULL   AUTO_INCREMENT ,  
+	`Booking_ID`                                                      INT            NOT NULL     COMMENT '예약ID', 
+	`Cust_ID`                                                         INT            NOT NULL    COMMENT '고객ID', 
+    `time_stamp`                                             timestamp    NOT NULL    COMMENT '예약 접수 날짜 및 시간',
+    `Booking_CheckInDate`                                             date    NOT NULL    COMMENT '예약 체크인 날짜', 
+    `Booking_CheckOutDate`                                            date           NOT NULL    COMMENT '예약 체크아웃 날짜', 
+    `booking_totalamount` INT            NULL    COMMENT '총 예약요금',
+    `LOG` 					VARCHAR(1) 				NULL,
+    CONSTRAINT  PRIMARY KEY (Bookinglog_ID)
+);
+
+
+############## Booking INSERT TRIGGER
+delimiter $$ 
+   create trigger Booking_trigger
+    after insert on Booking
+    for each row
+    begin
+      declare booking_id int;
+	  declare cust_id int;
+      declare time_stamp timestamp;
+	  declare booking_checkindate date;
+	  declare booking_checkoutdate date;
+      declare booking_totalamount int;
+      declare log varchar(1);
+      
+      set booking_id = new.booking_id;
+	  set cust_id = new.cust_id;
+	  set time_stamp = current_timestamp();
+      set booking_checkindate = new.booking_checkindate;
+	  set booking_checkoutdate = new.booking_checkoutdate;
+      set booking_totalamount = new.booking_totalamount;
+      set log = 'C';
+      
+      insert into bookinglog(booking_id,cust_id,time_stamp,booking_checkindate,booking_checkoutdate,booking_totalamount,log) 
+		value (booking_id,cust_id,time_stamp,booking_checkindate,booking_checkoutdate,booking_totalamount,log);
+   end $$
+delimiter ;
+
+############## Booking DELETE TRIGGER
+delimiter $$ 
+   create trigger Booking_trigger2
+    before delete on Booking
+    for each row
+    begin
+	  declare booking_id int;
+	  declare cust_id int;
+      declare time_stamp timestamp;
+	  declare booking_checkindate date;
+	  declare booking_checkoutdate date;
+      declare booking_totalamount int;
+      declare log varchar(1);
+      
+      set booking_id = old.booking_id;
+	  set cust_id = old.cust_id;
+	  set time_stamp = current_timestamp();
+      set booking_checkindate = old.booking_checkindate;
+	  set booking_checkoutdate = old.booking_checkoutdate;
+      set booking_totalamount = old.booking_totalamount;
+      set loG = 'D';
+      
+      insert into bookinglog(booking_id,cust_id,time_stamp,booking_checkindate,booking_checkoutdate,booking_totalamount,log) 
+		value (booking_id,cust_id,time_stamp,booking_checkindate,booking_checkoutdate,booking_totalamount,log);
+   end $$
+delimiter ;
+
+# system setting 
 select @peakstart := '2021-08-01';
 select @peakend := '2021-08-03';
-select @custid := 1;
-select @roomchoice := '디럭스룸';
-select @bedchoice := '더블';
-select @bedplus := 1;
-select @shuttle := 0;
-select @checkindate := '2021-06-16';
-select @checkoutdate := '2021-06-18';
-select @peoplenum := '3';
-select @bookername := '이성규';
-select @bookerphonenumber := '010-4906-8347';
-select @guestname := '이성규';
-select @guestphonenumber := '010-4906-8347';
-select @roomamount := 2;
+##################
 
-INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, room_amount, Cust_ID, People_No, Booker_name, Booker_PhoneNumber,guest_name, guest_PhoneNumber, Room_Choice, bed_choice, Bed_PlusState, shuttle_yesno, booking_totalamount)
+# customer input
+select @custid := 8;
+select @roomchoice := '수페리어룸 suite';
+select @bedchoice := '더블';
+select @bedplus := 0;
+select @shuttle := 0;
+select @checkindate := '2021-06-07';
+select @checkoutdate := '2021-06-09';
+select @peoplenum := '2';
+select @bookername := '아이유';
+select @bookerphonenumber := '010-1234-5617';
+select @guestname := '아이유';
+select @guestphonenumber := '010-1234-5617';
+###################
+
+
+select * from booking;
+
+
+INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Booker_name, Booker_PhoneNumber,guest_name, guest_PhoneNumber, Room_Choice, bed_choice, Bed_PlusState, shuttle_yesno, booking_totalamount)
 VALUES
-(now(), @checkindate, @checkoutdate, @roomamount, @custid, @peoplenum, @bookername, @bookerphonenumber, @guestname, @guestphonenumber,
+(now(), @checkindate, @checkoutdate, @custid, @peoplenum, @bookername, @bookerphonenumber, @guestname, @guestphonenumber,
 @roomchoice, @bedchoice, @bedplus, @shuttle,
 (select sum(room_price) from(
 select d1, if(dayofweek(d2) in (1,7), 1, 0) as week, if(d3 between @peakstart and @peakend, 1, 0) as peak                    # Add up all room charges.
@@ -940,9 +1027,16 @@ inner join
 ) c
 where d3 between @checkindate and DATE_ADD(@checkoutdate, INTERVAL -1 HOUR)) as t3 on t1.d1 = t3.d3) as temp # Temporary table before price fetch
 inner join               # Calculation of additional charges for the number of people and extra beds
-(select @roomamount * (room_price + (@bedplus * 20000) + if(@peoplenum > 2, ((@peoplenum - 2) * 10000), 0)) as room_price, room_week, room_peak, room_type from roomprice where room_type = @roomchoice) as t4 on temp.week = t4.room_week and temp.peak = t4.room_peak));
-    
+(select room_price + (@bedplus * 20000) + if(@peoplenum > 2, ((@peoplenum - 2) * 10000), 0) as room_price, room_week, room_peak, room_type from roomprice where room_type = @roomchoice) as t4 on temp.week = t4.room_week and temp.peak = t4.room_peak));
+    	
+
 select * from booking;
+
+select @bookingid := (select booking_id from booking where booker_name = '아이유' and booker_phonenumber = '010-1234-5617');
+delete from booking where booking_id = @bookingid;
+
+
+
 
 ############################################################################################################################################################
 
@@ -962,21 +1056,23 @@ select * from booking;
 # 4번 순서 #
 
 ########################## BOOKCANCEL ##########################
+select @bookcancel := '26';
+select @cancelreason := '코로나';
 
-select @bookcancel := '1';
-
-INSERT INTO BOOKCANCEL (Can_Reason, Can_CurrentDate, Can_Datedif, Can_Refund, Booking_ID, Pol_ID, cust_id)
-(select '코로나', current_date(), datediff(Booking_CheckInDate, current_date()) as dif,
-	booking_totalamount *
-	(select pol_refundRate from cancelpolicy where pol_id = if(dif <= 1, '1', if(dif <= 3, '2', if(dif <= 4, '3', 4)))), 
+INSERT INTO BOOKCANCEL (Can_Reason, Can_CurrentDate, Can_Datedif, Can_fee, Booking_ID, Pol_ID, cust_id)
+(select @cancelreason, current_date(), datediff(Booking_CheckInDate, current_date()) as dif,
+	booking_totalamount * (1-
+	(select pol_refundRate from cancelpolicy where pol_id = if(dif <= 1, '1', if(dif <= 3, '2', if(dif <= 4, '3', 4))))), 
 		booking.booking_id, pol_id, cust_id from booking, cancelpolicy
-			where pol_id = if(datediff(Booking_CheckInDate, current_date()) <= 1, '1', if(datediff(Booking_CheckInDate, current_date()) <= 3, '2', if(datediff(Booking_CheckInDate, current_date()) <= 4, '3', 4)))
+			where pol_id = if(datediff(Booking_CheckInDate, current_date()) <= 1, '1', if(datediff(Booking_CheckInDate, current_date()) <= 3, '2',
+            if(datediff(Booking_CheckInDate, current_date()) <= 4, '3', 4)))
 				and booking_id 
 					in (@bookcancel));
 
 delete from booking where booking_id in (select booking_id from bookcancel);
 
-select * from booking;
+
+select * from bookcancel;
 
 ##############################################################################
 
@@ -992,26 +1088,88 @@ select * from booking;
 
 ########################## ROOMSTATE ####################################################
 
+
+CREATE TABLE ROOMSTATElog #########ROOMSTATE LOG TABLE 
+(
+    `Roomstatelog_ID`          INT       NOT NULL   AUTO_INCREMENT ,  
+    `Room_ID`          INT       NOT NULL    ,
+    `roomstate_state` bool  not null,
+    `Cust_ID`          INT       NULL   ,
+    `booking_id`      INT       NULL,
+    `time_stamp` timestamp not null,
+    CONSTRAINT  PRIMARY KEY (Roomstatelog_ID)
+);
+
+select * from roomstatelog;
+
+
+############## ROOMSTATE TRIGGER
+delimiter $$ 
+   create trigger roomstate_trigger
+    after update on ROOMSTATE
+    for each row
+    begin
+      declare room_id int;
+      declare roomstate_state int;
+        declare cust_id int;
+        declare booking_id int;
+      declare time_stamp timestamp;
+
+      set room_id = @roomaloct;
+   if new.roomstate_state = 1 then 				############CHECKIN TRIGGER
+        set roomstate_state = new.roomstate_state;
+        set cust_id = new.cust_id;
+      set booking_id = new.booking_id;
+        set time_stamp = current_timestamp();
+        insert into roomstatelog(room_id,roomstate_state,cust_id,booking_id,time_stamp) value (room_id,roomstate_state,cust_id,booking_id,time_stamp);
+   else 										############CHECKOUT TRIGGER 
+        set roomstate_state = new.roomstate_state;
+        set cust_id = old.cust_id;
+      set booking_id = old.booking_id;
+        set time_stamp = current_timestamp();
+        insert into roomstatelog(room_id,roomstate_state,cust_id,booking_id,time_stamp) value (room_id,roomstate_state,cust_id,booking_id,time_stamp);
+   end if;
+   end $$
+delimiter ;
+
+select * from ROOMSTATElog;
+
+
  INSERT INTO ROOMSTATE(Room_ID, RoomState_State, Cust_ID, Booking_ID) 
  (select room_id, '0', null, null from room);
 
-select @bookingid := 1, @roomaloct := 51;
-
-select @Bookingid := (select booking_id from booking where cust_id = 2) , @RoomAloct := 51;
+############ CHECKIN PROCESS
+select @custid := 1, @bookingid := 24, @roomaloct := 101;  ### check custid, bookingid, roomid allocated for checkin
 
 UPDATE roomstate
-SET booking_id = @Bookingid
+SET booking_id = @Bookingid, cust_id = @custid, roomstate_state = 1
 where roomstate.room_id = @RoomAloct;
 
-UPDATE roomstate
-INNER JOIN booking ON roomstate.booking_id = booking.booking_id
-SET roomstate.cust_id=booking.cust_id;
-
-UPDATE roomstate
-SET roomstate_state = 1
-where roomstate.cust_id IS NOT NULL ;
-
 select * from roomstate;
+
+############ CHECKOUT PROCESS
+select @roomaloct := 51; ### check roomid allocated for checkout
+
+UPDATE roomstate
+SET booking_id = NULL, cust_id = NULL, roomstate_state = 0
+where roomstate.room_id = @RoomAloct;
+
+# UPDATE roomstate
+#SET roomstate_state = 1
+#where roomstate.cust_id IS NOT NULL ;
+
+select * from roomstatelog; #log table
+
+
+### 언제 몇번방에 묵었는지 로그확인
+select @custid := (select cust_id from customer where cust_name = '이성규' and cust_contact = '010-4906-8347'); # cust_id 검색
+
+select * 
+	from roomstatelog
+		where cust_id=@custid;
+
+
+
 
 ########################################################################################################
 
@@ -1022,7 +1180,7 @@ INSERT INTO cardkey(room_id, cust_id)
 	from room);
    
 
-select @keyid := 2;   
+select @keyid := 101;   
 
 UPDATE cardkey
 SET cardkey.room_id = @roomAloct
@@ -1034,6 +1192,7 @@ INNER JOIN roomstate ON cardkey.room_id = roomstate.room_id
 SET cardkey.cust_id=roomstate.cust_id;
 
 select * from cardkey;
+
 
 ##################################################################################################################################
 
@@ -1058,9 +1217,9 @@ select * from servicerequirement;
 ##################################################################################################################################
 
 ########################## FACILITYREQUIREMENT ########################################################################################################
-select @key_id := 2; # 카드키 번호
+select @key_id := 101; # 카드키 번호
 select @facility := '수영장'; # 시설 유형
-select @num := 4; # 사람 수
+select @num := 1; # 사람 수
 
 INSERT INTO FACILITYREQUIREMENT (Fac_ID, Fac_Count, FacReq_TotalAmount, KEY_ID, Cust_ID)
    select Fac_ID,
@@ -1077,11 +1236,10 @@ select * from FACILITYREQUIREMENT;
 
 
 
-
 ########################## RESTAURANTORDER ####################################################
-select @key_id := 2; # 카드키 번호
+select @key_id := 101; # 카드키 번호
 select @menu := '파스타'; # 메뉴 유형
-select @num := 2; # 사람 수
+select @num := 1; # 사람 수
 
 INSERT INTO RESTAURANTORDER (Res_ID, ResOrder_Menu, ResOrder_count, ResOrder_TotalAmount, KEY_ID, Cust_ID)
    select Res_ID,
@@ -1116,44 +1274,108 @@ select * from FINE;
 
 ########################## PAYMENT ####################################################
 
-select @paymentmethod := '신용카드';
 
-INSERT INTO PAYMENT (Pay_TotalAmount, Pay_Date, Pay_Type, KEY_ID, CUST_id)
-(select IFNULL(s1, 0)+IFNULL(s2, 0)+IFNULL(s3, 0)+IFNULL(s4, 0), t5.booking_checkoutdate, 
-@paymentmethod
-, t1.key_id, t1.cust_id from
-			(select cust_id,key_id,sum(serreq_totalamount) s1
-                from servicerequirement
-                    group by key_id) t1
-						left outer JOIN 
-            (select cust_id,key_id,sum(facreq_totalamount) s2
-                from facilityrequirement
-                    group by key_id) t2 ON t1.key_id = t2.key_id
-						left outer JOIN
-            (select cust_id,key_id,sum(resorder_totalamount) s3
-                from restaurantorder
-                    group by key_id) t3 ON t2.key_id = t3.key_id
-						left outer JOIN
-            (select cust_id,key_id,sum(fine_amount) s4
-                from fine
-                    group by key_id) t4 ON t3.key_id = t4.key_id
-						left outer JOIN                        
-			(select cust_id, booking_checkoutdate,
-					(case when booking_checkoutdate 
-						then 
-						date_add(
-							date_add(
-								date_add(booking_checkoutdate,
-								INTERVAL rand() * 24 hour),
-								INTERVAL rand() * 60 minute),
-								INTERVAL floor(rand() * 60) second)
-							end)
-								from booking) t5 on t1.cust_id = t5.cust_id
-                    );
+CREATE TABLE PAYMENTlog
+(
+	`paylog_id`				  			   					     INT			auto_increment,
+    `Pay_ID`                                                     INT             NOT NULL,  
+	`Cust_ID`                                                    INT             NOT NULL , 
+    `time_stamp`                                                 timestamp     NOT NULL  ,
+    `payamount`                                                  VARCHAR(15)         not NULL,    
+    `pay_type`                                                   varchar(15)             NULL   CHECK (Pay_Type IN ('신용카드','현금','수표','마일리지')),
+    `log`          		                                         varchar(15)             NOT NULL  ,
+    CONSTRAINT  PRIMARY KEY (Paylog_ID)
+);
+
+
+
+############## payment update TRIGGER
+delimiter $$ 
+   create trigger payment_trigger
+    after update on PAYMENT
+    for each row
+    begin
+	  declare pay_id int;
+	  declare cust_id int;
+      declare time_stamp timestamp;
+      declare payamount int;
+      declare pay_type varchar(15);
+      declare log varchar(1);
+      
+      set pay_id = old.pay_id;
+	  set cust_id = old.cust_id;
+	  set time_stamp = current_timestamp();
+      set payamount = @payamount;
+      set pay_type = @paytype;
+      set loG = 'C';
+      
+      insert into paymentlog(pay_id,cust_id,time_stamp,payamount,pay_type,log) 
+		value (pay_id,cust_id,time_stamp,payamount,pay_type,log) ;
+   end $$
+delimiter ;
+
+
+
+select @keyid := '101';
+
+INSERT INTO PAYMENT (KEY_ID, CUST_id, Pay_TotalAmount, Pay_Date, Pay_Type)    
+    (select t1.key_id, t1.cust_id,
+           sum(serreq_totalamount + facreq_totalamount + resorder_totalamount + fine_amount),
+           current_timestamp(), 
+           null
+    from 
+    (select cust_id, key_id
+		from cardkey where cust_id is not null
+			group by key_id) t1
+					inner join
+    ((select cust_id, key_id, serreq_totalamount, 0 as facreq_totalamount, 0 as resorder_totalamount, 0 as fine_amount
+           from servicerequirement
+          ) union all
+          (select cust_id, key_id, 0 as serreq_totalamount, facreq_totalamount, 0 as resorder_totalamount, 0 as fine_amount
+           from facilityrequirement
+          ) union all
+          (select cust_id, key_id, 0 as serreq_totalamount, 0 as facreq_totalamount, resorder_totalamount, 0 as fine_amount
+           from restaurantorder
+          ) union all
+          (select cust_id, key_id, 0 as serreq_totalamount, 0 as facreq_totalamount, 0 as resorder_totalamount, fine_amount
+           from fine
+          )
+         ) t2 on t1.key_id = t2.key_id
+         where t1.key_id = @keyid
+    group by cust_id, key_id);
+
 
 select * from payment;
 
+select @paytype := '신용카드'; 
+select @payamount := '22000';
+select @payid := '1';
+
+update payment 
+set pay_type = @paytype, pay_totalamount = pay_totalamount - @payamount
+where pay_id = @payid;
+
+select * from paymentlog;
+select * from bookinglog;
+
+select @bookingid := '13' ;
+select *
+	from(
+		(select * from paymentlog) t1
+			inner join
+		(select * from bookinglog where booking_id = @bookingid) t2 on t1.cust_id = t2.cust_id);
+
+        
+
+
 ##################################################################################################################################
+
+
+
+
+
+
+
 
 
 
@@ -1238,3 +1460,4 @@ if(rand() > 0.5, '신용카드', if (rand() > 0.7, '수표', '현금'))
   
 
 select * from payment;
+
