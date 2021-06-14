@@ -198,6 +198,7 @@ CREATE TABLE RESTAURANTORDER
 (
     `ResOrder_ID`                                 INT         NOT NULL    AUTO_INCREMENT COMMENT '주문 번호', 
     `Res_ID`                                      INT        NOT NULL    COMMENT '레스토랑ID', 
+	`Resorder_type`                                    VarChar(15) NOT NULL COMMENT '주문한 레스토랑 유형',
     `ResOrder_Menu`                               VarChar(15)     CHECK (ResOrder_Menu IN ('짜장면','우동','비빔밥','파스타','칵테일','맥주','바삭한 치킨'))    NOT NULL    COMMENT '주문 메뉴', 
 	`ResOrder_Count`                              INT    NOT NULL    COMMENT '주문요청 회수', 
     `ResOrder_TotalAmount`                       INT         NOT NULL    DEFAULT 0   COMMENT '주문 총액, [Res_Menu, Res_Price]', 
@@ -1113,6 +1114,7 @@ select @mileuse :=
 
 
 
+
 INSERT INTO BOOKING (Booking_CurrentDate,Booking_CheckInDate, Booking_CheckOutDate, Cust_ID, People_No, Booker_name, Booker_PhoneNumber,guest_name, guest_PhoneNumber, Room_Choice, bed_choice, Bed_PlusState, shuttle_yesno, booking_totalamount)
 VALUES
 (now(), @checkindate, @checkoutdate, @custid, @peoplenum, @bookername, @bookerphonenumber, @guestname, @guestphonenumber,
@@ -1270,7 +1272,10 @@ where roomstate.room_id = @RoomAloct;
 select * from roomstate;
 
 ############ CHECKOUT PROCESS
-select @roomaloct := 51; ### check roomid allocated for checkout
+select @keyid := 51; ### check roomid allocated for checkout
+select @roomacloct := (select room_id from cardkey where key_id = @keyid) ;
+
+select * from cardkey;
 
 UPDATE roomstate
 SET booking_id = NULL, cust_id = NULL, roomstate_state = 0
@@ -1321,7 +1326,7 @@ select * from cardkey;
 
 
 ########################### SERVICEREQUIRENT #############################################################################
-select @key_id := 2; # 카드키 번호
+select @keyid := 2; # 카드키 번호
 select @service := '떡 만들기'; # 서비스 유형
 select @num := 3; # 사람 수
 
@@ -1329,16 +1334,16 @@ insert into servicerequirement(service_id, serreq_count, serreq_totalamount, key
    select service_id,
     @num,
     (select * from (select service_price * @num) as pricexnum),
-   @key_id, cust_id 
+   @keyid, custid 
       from service, cardkey
-         where key_id = @key_id and service_type = @service;
+         where keyid = @keyid and service_type = @service;
             
 select * from servicerequirement;
 
 ##################################################################################################################################
 
 ########################## FACILITYREQUIREMENT ########################################################################################################
-select @key_id := 101; # 카드키 번호
+select @keyid := 101; # 카드키 번호
 select @facility := '수영장'; # 시설 유형
 select @num := 1; # 사람 수
 
@@ -1346,9 +1351,9 @@ INSERT INTO FACILITYREQUIREMENT (Fac_ID, Fac_Count, FacReq_TotalAmount, KEY_ID, 
    select Fac_ID,
    @num,
    (select * from (select Fac_Price * @num) as price2xnum),
-   @key_id, Cust_ID
+   @keyid, Cust_ID
       from FACILITY, CARDKEY 
-         where KEY_ID = @key_id and Fac_type = @facility;
+         where KEY_ID = @keyid and Fac_type = @facility;
    
             
 select * from FACILITYREQUIREMENT;
@@ -1358,25 +1363,26 @@ select * from FACILITYREQUIREMENT;
 
 
 ########################## RESTAURANTORDER ####################################################
-select @key_id := 101; # 카드키 번호
+select @keyid := 101; # 카드키 번호
+select @restype := '이탈리안식당'; 
 select @menu := '파스타'; # 메뉴 유형
 select @num := 1; # 주문 수
 
-INSERT INTO RESTAURANTORDER (Res_ID, ResOrder_Menu, ResOrder_count, ResOrder_TotalAmount, KEY_ID, Cust_ID)
-   select Res_ID,
-    @menu,
-    @num,
+select * from restaurant;
+
+INSERT INTO RESTAURANTORDER (Res_ID, Resorder_type,ResOrder_Menu, ResOrder_count, ResOrder_TotalAmount, KEY_ID, Cust_ID)
+   select Res_ID, @restype, @menu, @num,
     (select * from (select Res_Menu_Price * @num) as price3xnum),
     KEY_ID, Cust_ID
       from RESTAURANT, CARDKEY
-         where KEY_ID = @key_id and Res_Menu = @menu;
+         where KEY_ID = @keyid and res_type = @restype and Res_Menu = @menu;
             
 select * from RESTAURANTORDER;
 
 ########################################################################################################
 
 ########################## FINE ##############################################################################
-select @key_id := 2; # 카드키 번호
+select @keyid := 2; # 카드키 번호
 select @reason := '취사'; # 벌금 유형 
 select @price := '50000'; # 벌금 가격
 select @num := 2; # 횟수
@@ -1387,7 +1393,7 @@ INSERT INTO FINE (Fine_Amount, Fine_Reason, Cust_ID, KEY_ID)
     @reason,
     Cust_ID, KEY_ID
       from CARDKEY
-         where KEY_ID = @key_id;
+         where KEY_ID = @keyid;
 
 select * from FINE;
 
@@ -1396,13 +1402,8 @@ select * from FINE;
 ########################## PAYMENT ####################################################
 
 
-
-
-
 select @keyid := '101';
 select @paytype := '신용카드';
-select @mileuse := '0';
-select @mileuse := (select cust_currentmile from customer where cust_id = @custid); # all mile pay 
 
 INSERT INTO PAYMENT (KEY_ID, CUST_id, Pay_TotalAmount, Pay_Date, Pay_Type)    
     (select t1.key_id, t1.cust_id,
@@ -1430,17 +1431,18 @@ INSERT INTO PAYMENT (KEY_ID, CUST_id, Pay_TotalAmount, Pay_Date, Pay_Type)
          where t1.key_id = @keyid
     group by cust_id, key_id);
 
-select * from payment where pay_id = 6;
+select * from payment ;
 
 
-select * from paymentlog where paylog_id =6;
+select * from payment;
 
-select * from facilityrequirement;
+select @bookingid := '24';
+select * from
+	(select * from paymentlog) t1
+		inner join
+	(select * from bookinglog where booking_id = @bookingid)   ;
 
 
-
-update paymentlog
-set paylog_id = 6 where paylog_id =1;
 
 ##################################################################################################################################
 
